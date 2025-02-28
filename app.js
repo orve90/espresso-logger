@@ -109,15 +109,17 @@ function getRatioForShot(shot) {
 
 function getRatingDisplay(rating) {
   const ratingNum = parseInt(rating) || 0;
-  const filled = '●';
-  const empty = '○';
-  let display = '';
+  let html = '';
   
   for (let i = 1; i <= 5; i++) {
-    display += i <= ratingNum ? filled : empty;
+    if (i <= ratingNum) {
+      html += '●';
+    } else {
+      html += '○';
+    }
   }
   
-  return display;
+  return html;
 }
 
 // Event Handlers
@@ -148,6 +150,11 @@ function handleInputChange(event) {
   const { name, value } = event.target;
   state.formData[name] = value;
   state.error = '';
+  render();
+}
+
+function handleRatingDotClick(rating) {
+  state.formData.rating = rating;
   render();
 }
 
@@ -350,18 +357,14 @@ function render() {
             
             <div class="form-group">
               <label class="form-label">Rating</label>
-              <div class="rating-container">
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  step="1"
-                  name="rating"
-                  value="${state.formData.rating || 3}"
-                  class="form-control"
-                  style="width: auto; flex: 1;"
-                />
-                <span class="rating-display">${getRatingDisplay(state.formData.rating)}</span>
+              <div class="rating-dots">
+                ${[1, 2, 3, 4, 5].map(num => `
+                  <div 
+                    data-rating="${num}" 
+                    class="rating-dot ${parseInt(state.formData.rating) >= num ? 'active' : ''}"
+                  ></div>
+                `).join('')}
+                <input type="hidden" name="rating" id="rating-input" value="${state.formData.rating || 3}">
               </div>
             </div>
           </div>
@@ -475,8 +478,26 @@ function render() {
     form?.addEventListener('submit', handleSubmit);
     
     // Add listeners to all inputs
-    form?.querySelectorAll('input, textarea').forEach(input => {
+    form?.querySelectorAll('input:not([type="hidden"]), textarea').forEach(input => {
       input.addEventListener('change', handleInputChange);
+    });
+    
+    // Add click handlers for rating dots
+    document.querySelectorAll('.rating-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        const rating = dot.getAttribute('data-rating');
+        state.formData.rating = rating;
+        document.getElementById('rating-input').value = rating;
+        
+        // Update active state of dots
+        document.querySelectorAll('.rating-dot').forEach(d => {
+          if (parseInt(d.getAttribute('data-rating')) <= parseInt(rating)) {
+            d.classList.add('active');
+          } else {
+            d.classList.remove('active');
+          }
+        });
+      });
     });
     
     document.getElementById('cancel-edit')?.addEventListener('click', cancelEdit);
