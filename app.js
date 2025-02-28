@@ -1,4 +1,4 @@
-// Firebase Configuration - BROWSER VERSION
+// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBPp-evesGdf93i6Ms5770qiL4Smdnxo3c",
   authDomain: "espresso-logger-c6a6d.firebaseapp.com",
@@ -8,27 +8,18 @@ const firebaseConfig = {
   appId: "1:36334040646:web:e0ac359f4b8f6c1cbe7c47"
 };
 
-// Initialize Firebase (browser version)
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const EspressoLogger = () => {
-  // Minimalist monochrome color palette inspired by % Arabica
-  const colors = {
-    black: "#000000",
-    darkGray: "#333333",
-    mediumGray: "#666666",
-    lightGray: "#E0E0E0",
-    offWhite: "#F5F5F5",
-    white: "#FFFFFF",
-    accent: "#BBBBBB" // Subtle accent
-  };
-
-  // State management
-  const [shots, setShots] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  
-  const [formData, setFormData] = React.useState({
+// App state
+let state = {
+  shots: [],
+  loading: true,
+  error: '',
+  isFormVisible: false,
+  editIndex: null,
+  formData: {
     date: new Date().toISOString().split('T')[0],
     coffeeIn: '',
     espressoOut: '',
@@ -37,833 +28,470 @@ const EspressoLogger = () => {
     notes: '',
     rating: '3',
     beanName: '',
-  });
+  }
+};
+
+// DOM elements
+const app = document.getElementById('app');
+
+// Initial render
+render();
+
+// Set up real-time listener for shots
+function setupShotsListener() {
+  state.loading = true;
+  render();
   
-  const [editIndex, setEditIndex] = React.useState(null);
-  const [isFormVisible, setIsFormVisible] = React.useState(false);
-  const [error, setError] = React.useState('');
-
-  // Load shots from Firestore
-  React.useEffect(() => {
-    const loadShots = async () => {
-      setLoading(true);
-      try {
-        // Create a real-time listener to keep data in sync across devices
-        const unsubscribe = db.collection('shots')
-          .orderBy('date', 'desc')
-          .onSnapshot((snapshot) => {
-            const shotData = snapshot.docs.map(doc => ({
-              id: doc.id,
-              ...doc.data()
-            }));
-            setShots(shotData);
-            setLoading(false);
-          }, (error) => {
-            console.error("Error loading shots:", error);
-            setError('Could not load shots from the cloud.');
-            setLoading(false);
-          });
-          
-        // Clean up listener on unmount
-        return () => unsubscribe();
-      } catch (error) {
-        console.error("Error setting up shots listener:", error);
-        setError('Could not connect to the cloud database.');
-        setLoading(false);
-      }
-    };
-    
-    loadShots();
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear errors when user makes changes
-    setError('');
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    try {
-      setLoading(true);
-      if (editIndex !== null) {
-        // Update existing shot
-        const shotId = shots[editIndex].id;
-        await db.collection('shots').doc(shotId).update({
-          ...formData,
-          updatedAt: new Date().toISOString()
-        });
-        setEditIndex(null);
-      } else {
-        // Add new shot
-        await db.collection('shots').add({
-          ...formData,
-          createdAt: new Date().toISOString()
-        });
-      }
-      
-      // Reset form
-      setFormData({
-        date: new Date().toISOString().split('T')[0],
-        coffeeIn: '',
-        espressoOut: '',
-        grindSize: '',
-        extractionTime: '',
-        notes: '',
-        rating: '3',
-        beanName: '',
+  try {
+    return db.collection('shots')
+      .orderBy('date', 'desc')
+      .onSnapshot((snapshot) => {
+        const shotData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        state.shots = shotData;
+        state.loading = false;
+        render();
+      }, (error) => {
+        console.error("Error loading shots:", error);
+        state.error = 'Could not load shots from the cloud.';
+        state.loading = false;
+        render();
       });
-      
-      setIsFormVisible(false);
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      setError('An error occurred while saving to the cloud. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error("Error setting up shots listener:", error);
+    state.error = 'Could not connect to the cloud database.';
+    state.loading = false;
+    render();
+    return () => {};
+  }
+}
 
-  const handleEdit = (index) => {
-    try {
-      setFormData(shots[index]);
-      setEditIndex(index);
-      setIsFormVisible(true);
-      setError('');
-    } catch (error) {
-      console.error("Error editing shot:", error);
-      setError('Could not edit this entry. Please try again.');
-    }
-  };
+// Set up listener when page loads
+const unsubscribe = setupShotsListener();
 
-  const handleDelete = async (index) => {
-    try {
-      if (window.confirm('Are you sure you want to delete this shot?')) {
-        setLoading(true);
-        const shotId = shots[index].id;
-        await db.collection('shots').doc(shotId).delete();
-      }
-    } catch (error) {
-      console.error("Error deleting shot:", error);
-      setError('Could not delete this entry from the cloud. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+// Cleanup listener on page unload
+window.addEventListener('beforeunload', () => {
+  unsubscribe();
+});
 
-  const calculateRatio = () => {
-    try {
-      if (formData.coffeeIn && formData.espressoOut) {
-        const coffeeInNum = parseFloat(formData.coffeeIn);
-        // Prevent division by zero
-        if (coffeeInNum <= 0) return '';
-        return (parseFloat(formData.espressoOut) / coffeeInNum).toFixed(1);
-      }
-      return '';
-    } catch (error) {
-      console.error("Error calculating ratio:", error);
-      return '';
+// Helper Functions
+function calculateRatio(coffeeIn, espressoOut) {
+  try {
+    if (coffeeIn && espressoOut) {
+      const coffeeInNum = parseFloat(coffeeIn);
+      if (coffeeInNum <= 0) return '';
+      return (parseFloat(espressoOut) / coffeeInNum).toFixed(1);
     }
-  };
+    return '';
+  } catch (error) {
+    console.error("Error calculating ratio:", error);
+    return '';
+  }
+}
 
-  const getRatioForShot = (shot) => {
-    try {
-      const coffeeIn = parseFloat(shot.coffeeIn);
-      const espressoOut = parseFloat(shot.espressoOut);
-      
-      if (isNaN(coffeeIn) || isNaN(espressoOut) || coffeeIn <= 0) {
-        return 'N/A';
-      }
-      
-      return `${(espressoOut / coffeeIn).toFixed(1)}:1`;
-    } catch (error) {
-      console.error("Error calculating shot ratio:", error);
-      return 'Error';
-    }
-  };
-
-  const getRatingDisplay = (rating) => {
-    const ratingNum = parseInt(rating) || 0;
-    // Simple visual indicator instead of emojis
-    const filled = '●';
-    const empty = '○';
-    let display = '';
+function getRatioForShot(shot) {
+  try {
+    const coffeeIn = parseFloat(shot.coffeeIn);
+    const espressoOut = parseFloat(shot.espressoOut);
     
-    for (let i = 1; i <= 5; i++) {
-      display += i <= ratingNum ? filled : empty;
+    if (isNaN(coffeeIn) || isNaN(espressoOut) || coffeeIn <= 0) {
+      return 'N/A';
     }
     
-    return display;
-  };
+    return `${(espressoOut / coffeeIn).toFixed(1)}:1`;
+  } catch (error) {
+    console.error("Error calculating shot ratio:", error);
+    return 'Error';
+  }
+}
 
-  return (
-    <div style={{ backgroundColor: colors.white, minHeight: '100vh' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-        <header style={{ marginBottom: '3rem', paddingTop: '1rem' }}>
-          <h1 style={{ 
-            color: colors.black, 
-            letterSpacing: '0.05em',
-            fontSize: '2rem',
-            fontWeight: 300,
-            textTransform: 'uppercase',
-            textAlign: 'center'
-          }}>
-            % <span style={{ letterSpacing: '0.2em' }}>ESPRESSO</span>
-          </h1>
-          <p style={{ 
-            color: colors.mediumGray, 
-            textAlign: 'center',
-            fontSize: '0.875rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.2em',
-            marginTop: '0.25rem'
-          }}>
-            Shot Logger
-          </p>
-        </header>
-        
-        {loading && (
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            margin: '2rem 0'
-          }}>
-            <div style={{ 
-              borderTop: `2px solid ${colors.black}`,
-              borderRight: `2px solid ${colors.lightGray}`,
-              borderBottom: `2px solid ${colors.lightGray}`,
-              borderLeft: `2px solid ${colors.lightGray}`,
-              borderRadius: '50%',
-              width: '1.5rem',
-              height: '1.5rem',
-              animation: 'spin 1s linear infinite'
-            }}></div>
-            <span style={{ 
-              marginLeft: '0.5rem',
-              fontSize: '0.875rem',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              color: colors.mediumGray
-            }}>Syncing</span>
-          </div>
-        )}
-        
-        {error && (
-          <div style={{ 
-            backgroundColor: colors.offWhite, 
-            color: colors.black, 
-            border: `1px solid ${colors.lightGray}`,
-            padding: '1rem',
-            marginBottom: '1.5rem',
-            fontSize: '0.875rem'
-          }}>
-            <p>{error}</p>
-          </div>
-        )}
-        
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          marginBottom: '2rem'
-        }}>
-          <button 
-            onClick={() => {
-              setIsFormVisible(!isFormVisible);
-              if (!isFormVisible) setError('');
-            }} 
-            style={{ 
-              backgroundColor: isFormVisible ? colors.lightGray : colors.black,
-              color: isFormVisible ? colors.black : colors.white,
-              padding: '0.5rem 1rem',
-              fontSize: '0.75rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              fontWeight: 300,
-              border: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            {isFormVisible ? 'Cancel' : 'New Entry'}
-          </button>
-          
-          <div style={{ 
-            color: colors.mediumGray,
-            fontSize: '0.75rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em'
-          }}>
-            {shots.length} {shots.length === 1 ? 'shot' : 'shots'} recorded
-          </div>
+function getRatingDisplay(rating) {
+  const ratingNum = parseInt(rating) || 0;
+  const filled = '●';
+  const empty = '○';
+  let display = '';
+  
+  for (let i = 1; i <= 5; i++) {
+    display += i <= ratingNum ? filled : empty;
+  }
+  
+  return display;
+}
+
+// Event Handlers
+function toggleForm() {
+  state.isFormVisible = !state.isFormVisible;
+  if (!state.isFormVisible) {
+    state.editIndex = null;
+    resetForm();
+  }
+  state.error = '';
+  render();
+}
+
+function resetForm() {
+  state.formData = {
+    date: new Date().toISOString().split('T')[0],
+    coffeeIn: '',
+    espressoOut: '',
+    grindSize: '',
+    extractionTime: '',
+    notes: '',
+    rating: '3',
+    beanName: '',
+  };
+}
+
+function handleInputChange(event) {
+  const { name, value } = event.target;
+  state.formData[name] = value;
+  state.error = '';
+  render();
+}
+
+async function handleSubmit(event) {
+  event.preventDefault();
+  
+  try {
+    state.loading = true;
+    render();
+    
+    if (state.editIndex !== null) {
+      // Update existing shot
+      const shotId = state.shots[state.editIndex].id;
+      await db.collection('shots').doc(shotId).update({
+        ...state.formData,
+        updatedAt: new Date().toISOString()
+      });
+      state.editIndex = null;
+    } else {
+      // Add new shot
+      await db.collection('shots').add({
+        ...state.formData,
+        createdAt: new Date().toISOString()
+      });
+    }
+    
+    resetForm();
+    state.isFormVisible = false;
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    state.error = 'An error occurred while saving to the cloud. Please try again.';
+  } finally {
+    state.loading = false;
+    render();
+  }
+}
+
+function handleEdit(index) {
+  try {
+    state.formData = { ...state.shots[index] };
+    state.editIndex = index;
+    state.isFormVisible = true;
+    state.error = '';
+    render();
+  } catch (error) {
+    console.error("Error editing shot:", error);
+    state.error = 'Could not edit this entry. Please try again.';
+    render();
+  }
+}
+
+async function handleDelete(index) {
+  try {
+    if (window.confirm('Are you sure you want to delete this shot?')) {
+      state.loading = true;
+      render();
+      
+      const shotId = state.shots[index].id;
+      await db.collection('shots').doc(shotId).delete();
+    }
+  } catch (error) {
+    console.error("Error deleting shot:", error);
+    state.error = 'Could not delete this entry from the cloud. Please try again.';
+    state.loading = false;
+    render();
+  }
+}
+
+function cancelEdit() {
+  state.editIndex = null;
+  state.isFormVisible = false;
+  resetForm();
+  state.error = '';
+  render();
+}
+
+// Render function
+function render() {
+  app.innerHTML = `
+    <div class="container">
+      <header>
+        <h1 class="app-title">% <span>ESPRESSO</span></h1>
+        <p class="app-subtitle">Shot Logger</p>
+      </header>
+      
+      ${state.loading ? `
+        <div class="loading">
+          <div class="spinner"></div>
+          <span class="loading-text">Syncing</span>
         </div>
+      ` : ''}
+      
+      ${state.error ? `
+        <div class="error-message">
+          <p>${state.error}</p>
+        </div>
+      ` : ''}
+      
+      <div class="controls">
+        <button id="toggle-form" class="btn ${state.isFormVisible ? 'btn-secondary' : ''}">
+          ${state.isFormVisible ? 'Cancel' : 'New Entry'}
+        </button>
         
-        {isFormVisible && (
-          <form 
-            onSubmit={handleSubmit} 
-            style={{ 
-              backgroundColor: colors.offWhite,
-              marginBottom: '3rem',
-              padding: '1.5rem'
-            }}
-          >
-            <h2 style={{ 
-              color: colors.black,
-              fontSize: '0.875rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginBottom: '1.5rem',
-              fontWeight: 300
-            }}>
-              {editIndex !== null ? 'Edit Shot' : 'New Shot'}
-            </h2>
-            
-            <div style={{ 
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-              gap: '1.5rem',
-              marginBottom: '1.5rem'
-            }}>
-              <div>
-                <label style={{ 
-                  color: colors.mediumGray,
-                  display: 'block',
-                  marginBottom: '0.25rem',
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em'
-                }}>
-                  Date
-                </label>
-                <input
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleChange}
-                  style={{ 
-                    width: '100%',
-                    padding: '0.5rem',
-                    fontSize: '0.875rem',
-                    borderColor: colors.lightGray,
-                    backgroundColor: colors.white,
-                    color: colors.black
-                  }}
-                  required
-                />
-              </div>
-              
-              <div>
-                <label style={{ 
-                  color: colors.mediumGray,
-                  display: 'block',
-                  marginBottom: '0.25rem',
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em'
-                }}>
-                  Bean Origin
-                </label>
-                <input
-                  type="text"
-                  name="beanName"
-                  value={formData.beanName}
-                  onChange={handleChange}
-                  style={{ 
-                    width: '100%',
-                    padding: '0.5rem',
-                    fontSize: '0.875rem',
-                    borderColor: colors.lightGray,
-                    backgroundColor: colors.white,
-                    color: colors.black
-                  }}
-                  placeholder="Ethiopia Yirgacheffe"
-                />
-              </div>
-              
-              <div>
-                <label style={{ 
-                  color: colors.mediumGray,
-                  display: 'block',
-                  marginBottom: '0.25rem',
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em'
-                }}>
-                  Dose (g)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0.1"
-                  name="coffeeIn"
-                  value={formData.coffeeIn}
-                  onChange={handleChange}
-                  style={{ 
-                    width: '100%',
-                    padding: '0.5rem',
-                    fontSize: '0.875rem',
-                    borderColor: colors.lightGray,
-                    backgroundColor: colors.white,
-                    color: colors.black
-                  }}
-                  placeholder="18.0"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label style={{ 
-                  color: colors.mediumGray,
-                  display: 'block',
-                  marginBottom: '0.25rem',
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em'
-                }}>
-                  Yield (g)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  name="espressoOut"
-                  value={formData.espressoOut}
-                  onChange={handleChange}
-                  style={{ 
-                    width: '100%',
-                    padding: '0.5rem',
-                    fontSize: '0.875rem',
-                    borderColor: colors.lightGray,
-                    backgroundColor: colors.white,
-                    color: colors.black
-                  }}
-                  placeholder="36.0"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label style={{ 
-                  color: colors.mediumGray,
-                  display: 'block',
-                  marginBottom: '0.25rem',
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em'
-                }}>
-                  Grind Setting
-                </label>
-                <input
-                  type="text"
-                  name="grindSize"
-                  value={formData.grindSize}
-                  onChange={handleChange}
-                  style={{ 
-                    width: '100%',
-                    padding: '0.5rem',
-                    fontSize: '0.875rem',
-                    borderColor: colors.lightGray,
-                    backgroundColor: colors.white,
-                    color: colors.black
-                  }}
-                  placeholder="2.5"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label style={{ 
-                  color: colors.mediumGray,
-                  display: 'block',
-                  marginBottom: '0.25rem',
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em'
-                }}>
-                  Time (sec)
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  name="extractionTime"
-                  value={formData.extractionTime}
-                  onChange={handleChange}
-                  style={{ 
-                    width: '100%',
-                    padding: '0.5rem',
-                    fontSize: '0.875rem',
-                    borderColor: colors.lightGray,
-                    backgroundColor: colors.white,
-                    color: colors.black
-                  }}
-                  placeholder="30"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label style={{ 
-                  color: colors.mediumGray,
-                  display: 'block',
-                  marginBottom: '0.25rem',
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em'
-                }}>
-                  Ratio
-                </label>
-                <input
-                  type="text"
-                  value={calculateRatio() ? `${calculateRatio()}:1` : ''}
-                  style={{ 
-                    width: '100%',
-                    padding: '0.5rem',
-                    fontSize: '0.875rem',
-                    backgroundColor: colors.lightGray,
-                    color: colors.mediumGray,
-                    border: 'none'
-                  }}
-                  disabled
-                />
-              </div>
-              
-              <div>
-                <label style={{ 
-                  color: colors.mediumGray,
-                  display: 'block',
-                  marginBottom: '0.25rem',
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em'
-                }}>
-                  Rating
-                </label>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <input
-                    type="range"
-                    min="1"
-                    max="5"
-                    step="1"
-                    name="rating"
-                    value={formData.rating}
-                    onChange={handleChange}
-                    style={{ width: '100%', marginRight: '0.5rem' }}
-                  />
-                  <span style={{ 
-                    color: colors.black, 
-                    letterSpacing: '0.3em',
-                    fontSize: '1.125rem',
-                    fontWeight: 300
-                  }}>
-                    {getRatingDisplay(formData.rating)}
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ 
-                color: colors.mediumGray,
-                display: 'block',
-                marginBottom: '0.25rem',
-                fontSize: '0.75rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em'
-              }}>
-                Notes
-              </label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                style={{ 
-                  width: '100%',
-                  padding: '0.5rem',
-                  fontSize: '0.875rem',
-                  borderColor: colors.lightGray,
-                  backgroundColor: colors.white,
-                  color: colors.black
-                }}
-                placeholder="Tasting notes, observations, improvements..."
-                rows="3"
+        <div class="shot-counter">
+          ${state.shots.length} ${state.shots.length === 1 ? 'shot' : 'shots'} recorded
+        </div>
+      </div>
+      
+      ${state.isFormVisible ? `
+        <form id="shot-form" class="form">
+          <h2 class="form-title">
+            ${state.editIndex !== null ? 'Edit Shot' : 'New Shot'}
+          </h2>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input
+                type="date"
+                name="date"
+                value="${state.formData.date}"
+                class="form-control"
+                required
               />
             </div>
             
-            <div style={{ display: 'flex' }}>
+            <div class="form-group">
+              <label class="form-label">Bean Origin</label>
+              <input
+                type="text"
+                name="beanName"
+                value="${state.formData.beanName || ''}"
+                class="form-control"
+                placeholder="Ethiopia Yirgacheffe"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Dose (g)</label>
+              <input
+                type="number"
+                step="0.1"
+                min="0.1"
+                name="coffeeIn"
+                value="${state.formData.coffeeIn || ''}"
+                class="form-control"
+                placeholder="18.0"
+                required
+              />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Yield (g)</label>
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                name="espressoOut"
+                value="${state.formData.espressoOut || ''}"
+                class="form-control"
+                placeholder="36.0"
+                required
+              />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Grind Setting</label>
+              <input
+                type="text"
+                name="grindSize"
+                value="${state.formData.grindSize || ''}"
+                class="form-control"
+                placeholder="2.5"
+                required
+              />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Time (sec)</label>
+              <input
+                type="number"
+                min="1"
+                name="extractionTime"
+                value="${state.formData.extractionTime || ''}"
+                class="form-control"
+                placeholder="30"
+                required
+              />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Ratio</label>
+              <input
+                type="text"
+                value="${calculateRatio(state.formData.coffeeIn, state.formData.espressoOut) ? `${calculateRatio(state.formData.coffeeIn, state.formData.espressoOut)}:1` : ''}"
+                class="form-control"
+                disabled
+              />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Rating</label>
+              <div class="rating-container">
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="1"
+                  name="rating"
+                  value="${state.formData.rating || 3}"
+                  class="form-control"
+                  style="width: auto; flex: 1;"
+                />
+                <span class="rating-display">${getRatingDisplay(state.formData.rating)}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <textarea
+              name="notes"
+              class="form-control"
+              placeholder="Tasting notes, observations, improvements..."
+              rows="3"
+            >${state.formData.notes || ''}</textarea>
+          </div>
+          
+          <div style="display: flex;">
+            <button
+              type="submit"
+              class="btn"
+              ${state.loading ? 'disabled' : ''}
+            >
+              ${state.editIndex !== null ? 'Update' : 'Save'}
+            </button>
+            
+            ${state.editIndex !== null ? `
               <button
-                type="submit"
-                style={{ 
-                  backgroundColor: colors.black,
-                  color: colors.white,
-                  padding: '0.5rem 1.5rem',
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  fontWeight: 300,
-                  marginRight: '0.75rem',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-                disabled={loading}
+                type="button"
+                id="cancel-edit"
+                class="btn btn-secondary"
+                style="margin-left: 1rem;"
+                ${state.loading ? 'disabled' : ''}
               >
-                {editIndex !== null ? 'Update' : 'Save'}
+                Cancel
               </button>
-              
-              {editIndex !== null && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditIndex(null);
-                    setIsFormVisible(false);
-                    setFormData({
-                      date: new Date().toISOString().split('T')[0],
-                      coffeeIn: '',
-                      espressoOut: '',
-                      grindSize: '',
-                      extractionTime: '',
-                      notes: '',
-                      rating: '3',
-                      beanName: '',
-                    });
-                    setError('');
-                  }}
-                  style={{ 
-                    backgroundColor: colors.lightGray,
-                    color: colors.black,
-                    padding: '0.5rem 1.5rem',
-                    fontSize: '0.75rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.1em',
-                    fontWeight: 300,
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
-                  disabled={loading}
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
-          </form>
-        )}
-        
-        {shots.length > 0 ? (
-          <div style={{ border: `1px solid ${colors.lightGray}` }}>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: colors.black, color: colors.white }}>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      fontSize: '0.75rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.1em',
-                      fontWeight: 300,
-                      textAlign: 'left'
-                    }}>Date</th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      fontSize: '0.75rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.1em',
-                      fontWeight: 300,
-                      textAlign: 'left'
-                    }}>Bean</th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      fontSize: '0.75rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.1em',
-                      fontWeight: 300,
-                      textAlign: 'right'
-                    }}>In</th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      fontSize: '0.75rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.1em',
-                      fontWeight: 300,
-                      textAlign: 'right'
-                    }}>Out</th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      fontSize: '0.75rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.1em',
-                      fontWeight: 300,
-                      textAlign: 'right'
-                    }}>Ratio</th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      fontSize: '0.75rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.1em',
-                      fontWeight: 300,
-                      textAlign: 'center'
-                    }}>Grind</th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      fontSize: '0.75rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.1em',
-                      fontWeight: 300,
-                      textAlign: 'right'
-                    }}>Time</th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      fontSize: '0.75rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.1em',
-                      fontWeight: 300,
-                      textAlign: 'center'
-                    }}>Rating</th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      fontSize: '0.75rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.1em',
-                      fontWeight: 300,
-                      textAlign: 'center'
-                    }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {shots.map((shot, index) => (
-                    <tr 
-                      key={shot.id || index} 
-                      style={{ 
-                        backgroundColor: index % 2 === 0 ? colors.white : colors.offWhite,
-                        borderTop: `1px solid ${colors.lightGray}`
-                      }}
-                    >
-                      <td style={{
-                        padding: '0.75rem 1rem',
-                        fontSize: '0.875rem',
-                        color: colors.black
-                      }}>{shot.date}</td>
-                      <td style={{
-                        padding: '0.75rem 1rem',
-                        fontSize: '0.875rem',
-                        color: colors.black
-                      }}>{shot.beanName || "—"}</td>
-                      <td style={{
-                        padding: '0.75rem 1rem',
-                        fontSize: '0.875rem',
-                        color: colors.black,
-                        textAlign: 'right'
-                      }}>{shot.coffeeIn}g</td>
-                      <td style={{
-                        padding: '0.75rem 1rem',
-                        fontSize: '0.875rem',
-                        color: colors.black,
-                        textAlign: 'right'
-                      }}>{shot.espressoOut}g</td>
-                      <td style={{
-                        padding: '0.75rem 1rem',
-                        fontSize: '0.875rem',
-                        color: colors.black,
-                        textAlign: 'right'
-                      }}>{getRatioForShot(shot)}</td>
-                      <td style={{
-                        padding: '0.75rem 1rem',
-                        fontSize: '0.875rem',
-                        color: colors.black,
-                        textAlign: 'center'
-                      }}>{shot.grindSize}</td>
-                      <td style={{
-                        padding: '0.75rem 1rem',
-                        fontSize: '0.875rem',
-                        color: colors.black,
-                        textAlign: 'right'
-                      }}>{shot.extractionTime}s</td>
-                      <td style={{
-                        padding: '0.75rem 1rem',
-                        fontSize: '0.875rem',
-                        color: colors.black,
-                        textAlign: 'center',
-                        letterSpacing: '0.2em'
-                      }}>{getRatingDisplay(shot.rating)}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.875rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                          <button
-                            onClick={() => handleEdit(index)}
-                            style={{ 
-                              backgroundColor: colors.lightGray, 
-                              color: colors.black,
-                              padding: '0.25rem 0.75rem',
-                              fontSize: '0.75rem',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.1em',
-                              border: 'none',
-                              cursor: 'pointer'
-                            }}
-                            disabled={loading}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(index)}
-                            style={{ 
-                              backgroundColor: colors.black, 
-                              color: colors.white,
-                              padding: '0.25rem 0.75rem',
-                              fontSize: '0.75rem',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.1em',
-                              border: 'none',
-                              cursor: 'pointer'
-                            }}
-                            disabled={loading}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            ` : ''}
           </div>
-        ) : !loading && (
-          <div style={{ 
-            border: `1px solid ${colors.lightGray}`, 
-            backgroundColor: colors.white,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '4rem 0'
-          }}>
-            <p style={{ 
-              color: colors.mediumGray,
-              fontSize: '0.875rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginBottom: '0.5rem'
-            }}>No shots recorded</p>
-            <p style={{ 
-              color: colors.lightGray,
-              fontSize: '0.75rem'
-            }}>Click "New Entry" to begin</p>
-          </div>
-        )}
-        
-        <footer style={{ marginTop: '3rem', textAlign: 'center' }}>
-          <p style={{ 
-            color: colors.mediumGray,
-            fontSize: '0.75rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em'
-          }}>
-            % Espresso Logger
-          </p>
-        </footer>
-      </div>
+        </form>
+      ` : ''}
+      
+      ${state.shots.length > 0 ? `
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Bean</th>
+                <th class="text-right">In</th>
+                <th class="text-right">Out</th>
+                <th class="text-right">Ratio</th>
+                <th class="text-center">Grind</th>
+                <th class="text-right">Time</th>
+                <th class="text-center">Rating</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${state.shots.map((shot, index) => `
+                <tr>
+                  <td>${shot.date}</td>
+                  <td>${shot.beanName || "—"}</td>
+                  <td class="text-right">${shot.coffeeIn}g</td>
+                  <td class="text-right">${shot.espressoOut}g</td>
+                  <td class="text-right">${getRatioForShot(shot)}</td>
+                  <td class="text-center">${shot.grindSize}</td>
+                  <td class="text-right">${shot.extractionTime}s</td>
+                  <td class="text-center" style="letter-spacing: 0.2em;">${getRatingDisplay(shot.rating)}</td>
+                  <td>
+                    <div class="action-buttons">
+                      <button
+                        class="btn btn-secondary"
+                        style="padding: 0.25rem 0.75rem; font-size: 0.75rem;"
+                        data-action="edit"
+                        data-index="${index}"
+                        ${state.loading ? 'disabled' : ''}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        class="btn"
+                        style="padding: 0.25rem 0.75rem; font-size: 0.75rem;"
+                        data-action="delete"
+                        data-index="${index}"
+                        ${state.loading ? 'disabled' : ''}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : !state.loading ? `
+        <div class="empty-state">
+          <p class="empty-title">No shots recorded</p>
+          <p class="empty-subtitle">Click "New Entry" to begin</p>
+        </div>
+      ` : ''}
+      
+      <footer>
+        <p class="footer-text">% Espresso Logger</p>
+      </footer>
     </div>
-  );
-};
-
-// Render the app
-ReactDOM.render(<EspressoLogger />, document.getElementById('root'));
+  `;
+  
+  // Add event listeners
+  document.getElementById('toggle-form')?.addEventListener('click', toggleForm);
+  
+  if (state.isFormVisible) {
+    const form = document.getElementById('shot-form');
+    form?.addEventListener('submit', handleSubmit);
+    
+    // Add listeners to all inputs
+    form?.querySelectorAll('input, textarea').forEach(input => {
+      input.addEventListener('change', handleInputChange);
+    });
+    
+    document.getElementById('cancel-edit')?.addEventListener('click', cancelEdit);
+  }
+  
+  // Add listeners to edit/delete buttons
+  document.querySelectorAll('[data-action="edit"]').forEach(button => {
+    button.addEventListener('click', () => {
+      handleEdit(parseInt(button.getAttribute('data-index')));
+    });
+  });
+  
+  document.querySelectorAll('[data-action="delete"]').forEach(button => {
+    button.addEventListener('click', () => {
+      handleDelete(parseInt(button.getAttribute('data-index')));
+    });
+  });
+}
