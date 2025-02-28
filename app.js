@@ -1,3 +1,17 @@
+// Firebase Configuration - using compat version for direct browser usage
+const firebaseConfig = {
+  apiKey: "AIzaSyBPp-evesGdf93i6Ms5770qiL4Smdnxo3c",
+  authDomain: "espresso-logger-c6a6d.firebaseapp.com",
+  projectId: "espresso-logger-c6a6d",
+  storageBucket: "espresso-logger-c6a6d.firebasestorage.app",
+  messagingSenderId: "36334040646",
+  appId: "1:36334040646:web:e0ac359f4b8f6c1cbe7c47"
+};
+
+// Initialize Firebase with compat version
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 const EspressoLogger = () => {
   // Coffee-themed color palette
   const colors = {
@@ -10,16 +24,9 @@ const EspressoLogger = () => {
     accent: "#D4A76A" // Golden crema
   };
 
-  // Safely load data from localStorage with error handling
-  const [shots, setShots] = React.useState(() => {
-    try {
-      const savedShots = localStorage.getItem('espressoShots');
-      return savedShots ? JSON.parse(savedShots) : [];
-    } catch (error) {
-      console.error("Error loading from localStorage:", error);
-      return [];
-    }
-  });
+  // State management
+  const [shots, setShots] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
   
   const [formData, setFormData] = React.useState({
     date: new Date().toISOString().split('T')[0],
@@ -36,15 +43,38 @@ const EspressoLogger = () => {
   const [isFormVisible, setIsFormVisible] = React.useState(false);
   const [error, setError] = React.useState('');
 
-  // Safely save data to localStorage with error handling
+  // Load shots from Firestore
   React.useEffect(() => {
-    try {
-      localStorage.setItem('espressoShots', JSON.stringify(shots));
-    } catch (error) {
-      console.error("Error saving to localStorage:", error);
-      setError('Could not save data to local storage. Your browser might have restrictions.');
-    }
-  }, [shots]);
+    const loadShots = async () => {
+      setLoading(true);
+      try {
+        // Create a real-time listener to keep data in sync across devices
+        const unsubscribe = db.collection('shots')
+          .orderBy('date', 'desc')
+          .onSnapshot((snapshot) => {
+            const shotData = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }));
+            setShots(shotData);
+            setLoading(false);
+          }, (error) => {
+            console.error("Error loading shots:", error);
+            setError('Could not load shots from the cloud.');
+            setLoading(false);
+          });
+          
+        // Clean up listener on unmount
+        return () => unsubscribe();
+      } catch (error) {
+        console.error("Error setting up shots listener:", error);
+        setError('Could not connect to the cloud database.');
+        setLoading(false);
+      }
+    };
+    
+    loadShots();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,19 +83,25 @@ const EspressoLogger = () => {
     setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
+      setLoading(true);
       if (editIndex !== null) {
         // Update existing shot
-        const updatedShots = [...shots];
-        updatedShots[editIndex] = { ...formData, id: shots[editIndex].id || Date.now() };
-        setShots(updatedShots);
+        const shotId = shots[editIndex].id;
+        await db.collection('shots').doc(shotId).update({
+          ...formData,
+          updatedAt: new Date().toISOString()
+        });
         setEditIndex(null);
       } else {
         // Add new shot
-        setShots(prev => [...prev, { ...formData, id: Date.now() }]);
+        await db.collection('shots').add({
+          ...formData,
+          createdAt: new Date().toISOString()
+        });
       }
       
       // Reset form
@@ -83,7 +119,9 @@ const EspressoLogger = () => {
       setIsFormVisible(false);
     } catch (error) {
       console.error("Error submitting form:", error);
-      setError('An error occurred while saving. Please try again.');
+      setError('An error occurred while saving to the cloud. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -99,14 +137,18 @@ const EspressoLogger = () => {
     }
   };
 
-  const handleDelete = (index) => {
+  const handleDelete = async (index) => {
     try {
       if (window.confirm('Are you sure you want to delete this shot?')) {
-        setShots(prev => prev.filter((_, i) => i !== index));
+        setLoading(true);
+        const shotId = shots[index].id;
+        await db.collection('shots').doc(shotId).delete();
       }
     } catch (error) {
       console.error("Error deleting shot:", error);
-      setError('Could not delete this entry. Please try again.');
+      setError('Could not delete this entry from the cloud. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -159,6 +201,13 @@ const EspressoLogger = () => {
         <h1 className="app-title" style={{ color: colors.darkBrown }}>
           ☕ Espresso Shot Logger ☕
         </h1>
+        
+        {loading && (
+          <div className="loading-indicator">
+            <div className="spinner"></div>
+            <p>Syncing your shots...</p>
+          </div>
+        )}
         
         {error && (
           <div className="error-message">
@@ -324,6 +373,7 @@ const EspressoLogger = () => {
                 type="submit"
                 className="save-btn"
                 style={{ backgroundColor: colors.accent }}
+                disabled={loading}
               >
                 {editIndex !== null ? '✅ Update Shot' : '✅ Save Shot'}
               </button>
@@ -347,6 +397,7 @@ const EspressoLogger = () => {
                     setError('');
                   }}
                   className="cancel-btn"
+                  disabled={loading}
                 >
                   ❌ Cancel
                 </button>
@@ -392,12 +443,14 @@ const EspressoLogger = () => {
                             onClick={() => handleEdit(index)}
                             className="edit-btn"
                             style={{ backgroundColor: colors.accent }}
+                            disabled={loading}
                           >
                             ✏️ Edit
                           </button>
                           <button
                             onClick={() => handleDelete(index)}
                             className="delete-btn"
+                            disabled={loading}
                           >
                             🗑️ Delete
                           </button>
@@ -409,7 +462,7 @@ const EspressoLogger = () => {
               </tbody>
             </table>
           </div>
-        ) : (
+        ) : !loading && (
           <div className="empty-state">
             <p className="empty-title" style={{ color: colors.mediumBrown }}>No shots logged yet ☕</p>
             <p className="empty-subtitle" style={{ color: colors.lightBrown }}>Click 'New Shot' to start tracking your espresso journey!</p>
