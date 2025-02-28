@@ -138,17 +138,29 @@ header {
   border: none;
 }
 
-.rating-container {
+/* Dot-based rating system */
+.rating-dots {
   display: flex;
   align-items: center;
+  gap: 16px;
+  margin-top: 8px;
 }
 
-.rating-display {
-  margin-left: 0.5rem;
-  letter-spacing: 0.3em;
-  font-size: 1.125rem;
-  font-weight: 300;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
+.rating-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #E0E0E0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.rating-dot.active {
+  background-color: #000000;
+}
+
+.rating-dot:hover {
+  opacity: 0.8;
 }
 
 /* Table */
@@ -271,59 +283,6 @@ footer {
   padding: 1rem;
   margin-bottom: 1.5rem;
   font-size: 0.875rem;
-}
-
-/* Slider styling with !important flags */
-input[type="range"] {
-  width: 100% !important;
-  margin: 0 !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  background: transparent !important;
-  height: 16px !important;
-}
-
-input[type="range"]::-webkit-slider-runnable-track {
-  width: 100% !important;
-  height: 4px !important;
-  background: #e0e0e0 !important;
-  border-radius: 2px !important;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  height: 16px !important;
-  width: 16px !important;
-  border-radius: 50% !important;
-  background: #000000 !important;
-  cursor: pointer !important;
-  margin-top: -6px !important;
-}
-
-input[type="range"]::-moz-range-track {
-  width: 100% !important;
-  height: 4px !important;
-  background: #e0e0e0 !important;
-  border-radius: 2px !important;
-}
-
-input[type="range"]::-moz-range-thumb {
-  height: 16px !important;
-  width: 16px !important;
-  border-radius: 50% !important;
-  background: #000000 !important;
-  cursor: pointer !important;
-  border: none !important;
-}
-
-input[type="range"]:focus {
-  outline: none !important;
-}
-
-/* Fix for Firefox */
-input[type="range"]::-moz-focus-outer {
-  border: 0 !important;
 }
 
 /* Target date inputs specifically */
