@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-
-// Firebase Configuration
+// Firebase Configuration - BROWSER VERSION
 const firebaseConfig = {
   apiKey: "AIzaSyBPp-evesGdf93i6Ms5770qiL4Smdnxo3c",
   authDomain: "espresso-logger-c6a6d.firebaseapp.com",
@@ -10,7 +8,7 @@ const firebaseConfig = {
   appId: "1:36334040646:web:e0ac359f4b8f6c1cbe7c47"
 };
 
-// Initialize Firebase with compat version
+// Initialize Firebase (browser version)
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -200,33 +198,77 @@ const EspressoLogger = () => {
   };
 
   return (
-    <div style={{ backgroundColor: colors.white, minHeight: '100vh' }} className="espresso-logger">
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        <header className="mb-12 pt-4">
-          <h1 style={{ color: colors.black, letterSpacing: '0.05em' }} className="text-4xl font-light uppercase tracking-widest text-center relative">
-            <span className="position-relative">
-              % <span style={{ letterSpacing: '0.2em' }}>ESPRESSO</span>
-            </span>
+    <div style={{ backgroundColor: colors.white, minHeight: '100vh' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+        <header style={{ marginBottom: '3rem', paddingTop: '1rem' }}>
+          <h1 style={{ 
+            color: colors.black, 
+            letterSpacing: '0.05em',
+            fontSize: '2rem',
+            fontWeight: 300,
+            textTransform: 'uppercase',
+            textAlign: 'center'
+          }}>
+            % <span style={{ letterSpacing: '0.2em' }}>ESPRESSO</span>
           </h1>
-          <p style={{ color: colors.mediumGray }} className="text-center text-sm uppercase tracking-widest mt-1">
+          <p style={{ 
+            color: colors.mediumGray, 
+            textAlign: 'center',
+            fontSize: '0.875rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.2em',
+            marginTop: '0.25rem'
+          }}>
             Shot Logger
           </p>
         </header>
         
         {loading && (
-          <div className="flex justify-center items-center my-8">
-            <div style={{ borderTopColor: colors.black }} className="border-2 border-gray-300 h-6 w-6 rounded-full animate-spin"></div>
-            <span className="ml-2 text-sm tracking-wide uppercase" style={{ color: colors.mediumGray }}>Syncing</span>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center',
+            margin: '2rem 0'
+          }}>
+            <div style={{ 
+              borderTop: `2px solid ${colors.black}`,
+              borderRight: `2px solid ${colors.lightGray}`,
+              borderBottom: `2px solid ${colors.lightGray}`,
+              borderLeft: `2px solid ${colors.lightGray}`,
+              borderRadius: '50%',
+              width: '1.5rem',
+              height: '1.5rem',
+              animation: 'spin 1s linear infinite'
+            }}></div>
+            <span style={{ 
+              marginLeft: '0.5rem',
+              fontSize: '0.875rem',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: colors.mediumGray
+            }}>Syncing</span>
           </div>
         )}
         
         {error && (
-          <div style={{ backgroundColor: colors.offWhite, color: colors.black, border: `1px solid ${colors.lightGray}` }} className="p-4 mb-6 text-sm">
+          <div style={{ 
+            backgroundColor: colors.offWhite, 
+            color: colors.black, 
+            border: `1px solid ${colors.lightGray}`,
+            padding: '1rem',
+            marginBottom: '1.5rem',
+            fontSize: '0.875rem'
+          }}>
             <p>{error}</p>
           </div>
         )}
         
-        <div className="flex justify-between items-center mb-8">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '2rem'
+        }}>
           <button 
             onClick={() => {
               setIsFormVisible(!isFormVisible);
@@ -234,27 +276,64 @@ const EspressoLogger = () => {
             }} 
             style={{ 
               backgroundColor: isFormVisible ? colors.lightGray : colors.black,
-              color: isFormVisible ? colors.black : colors.white
-            }} 
-            className="px-4 py-2 text-xs uppercase tracking-widest font-light"
+              color: isFormVisible ? colors.black : colors.white,
+              padding: '0.5rem 1rem',
+              fontSize: '0.75rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              fontWeight: 300,
+              border: 'none',
+              cursor: 'pointer'
+            }}
           >
             {isFormVisible ? 'Cancel' : 'New Entry'}
           </button>
           
-          <div style={{ color: colors.mediumGray }} className="text-xs uppercase tracking-wider">
+          <div style={{ 
+            color: colors.mediumGray,
+            fontSize: '0.75rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em'
+          }}>
             {shots.length} {shots.length === 1 ? 'shot' : 'shots'} recorded
           </div>
         </div>
         
         {isFormVisible && (
-          <form onSubmit={handleSubmit} style={{ backgroundColor: colors.offWhite }} className="mb-12 p-6">
-            <h2 style={{ color: colors.black }} className="text-sm uppercase tracking-widest mb-6 font-light">
+          <form 
+            onSubmit={handleSubmit} 
+            style={{ 
+              backgroundColor: colors.offWhite,
+              marginBottom: '3rem',
+              padding: '1.5rem'
+            }}
+          >
+            <h2 style={{ 
+              color: colors.black,
+              fontSize: '0.875rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginBottom: '1.5rem',
+              fontWeight: 300
+            }}>
               {editIndex !== null ? 'Edit Shot' : 'New Shot'}
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div style={{ 
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+              gap: '1.5rem',
+              marginBottom: '1.5rem'
+            }}>
               <div>
-                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                <label style={{ 
+                  color: colors.mediumGray,
+                  display: 'block',
+                  marginBottom: '0.25rem',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em'
+                }}>
                   Date
                 </label>
                 <input
@@ -262,8 +341,10 @@ const EspressoLogger = () => {
                   name="date"
                   value={formData.date}
                   onChange={handleChange}
-                  className="w-full p-2 text-sm"
                   style={{ 
+                    width: '100%',
+                    padding: '0.5rem',
+                    fontSize: '0.875rem',
                     borderColor: colors.lightGray,
                     backgroundColor: colors.white,
                     color: colors.black
@@ -273,7 +354,14 @@ const EspressoLogger = () => {
               </div>
               
               <div>
-                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                <label style={{ 
+                  color: colors.mediumGray,
+                  display: 'block',
+                  marginBottom: '0.25rem',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em'
+                }}>
                   Bean Origin
                 </label>
                 <input
@@ -281,8 +369,10 @@ const EspressoLogger = () => {
                   name="beanName"
                   value={formData.beanName}
                   onChange={handleChange}
-                  className="w-full p-2 text-sm"
                   style={{ 
+                    width: '100%',
+                    padding: '0.5rem',
+                    fontSize: '0.875rem',
                     borderColor: colors.lightGray,
                     backgroundColor: colors.white,
                     color: colors.black
@@ -292,7 +382,14 @@ const EspressoLogger = () => {
               </div>
               
               <div>
-                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                <label style={{ 
+                  color: colors.mediumGray,
+                  display: 'block',
+                  marginBottom: '0.25rem',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em'
+                }}>
                   Dose (g)
                 </label>
                 <input
@@ -302,8 +399,10 @@ const EspressoLogger = () => {
                   name="coffeeIn"
                   value={formData.coffeeIn}
                   onChange={handleChange}
-                  className="w-full p-2 text-sm"
                   style={{ 
+                    width: '100%',
+                    padding: '0.5rem',
+                    fontSize: '0.875rem',
                     borderColor: colors.lightGray,
                     backgroundColor: colors.white,
                     color: colors.black
@@ -314,7 +413,14 @@ const EspressoLogger = () => {
               </div>
               
               <div>
-                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                <label style={{ 
+                  color: colors.mediumGray,
+                  display: 'block',
+                  marginBottom: '0.25rem',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em'
+                }}>
                   Yield (g)
                 </label>
                 <input
@@ -324,8 +430,10 @@ const EspressoLogger = () => {
                   name="espressoOut"
                   value={formData.espressoOut}
                   onChange={handleChange}
-                  className="w-full p-2 text-sm"
                   style={{ 
+                    width: '100%',
+                    padding: '0.5rem',
+                    fontSize: '0.875rem',
                     borderColor: colors.lightGray,
                     backgroundColor: colors.white,
                     color: colors.black
@@ -336,7 +444,14 @@ const EspressoLogger = () => {
               </div>
               
               <div>
-                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                <label style={{ 
+                  color: colors.mediumGray,
+                  display: 'block',
+                  marginBottom: '0.25rem',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em'
+                }}>
                   Grind Setting
                 </label>
                 <input
@@ -344,8 +459,10 @@ const EspressoLogger = () => {
                   name="grindSize"
                   value={formData.grindSize}
                   onChange={handleChange}
-                  className="w-full p-2 text-sm"
                   style={{ 
+                    width: '100%',
+                    padding: '0.5rem',
+                    fontSize: '0.875rem',
                     borderColor: colors.lightGray,
                     backgroundColor: colors.white,
                     color: colors.black
@@ -356,7 +473,14 @@ const EspressoLogger = () => {
               </div>
               
               <div>
-                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                <label style={{ 
+                  color: colors.mediumGray,
+                  display: 'block',
+                  marginBottom: '0.25rem',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em'
+                }}>
                   Time (sec)
                 </label>
                 <input
@@ -365,8 +489,10 @@ const EspressoLogger = () => {
                   name="extractionTime"
                   value={formData.extractionTime}
                   onChange={handleChange}
-                  className="w-full p-2 text-sm"
                   style={{ 
+                    width: '100%',
+                    padding: '0.5rem',
+                    fontSize: '0.875rem',
                     borderColor: colors.lightGray,
                     backgroundColor: colors.white,
                     color: colors.black
@@ -377,14 +503,23 @@ const EspressoLogger = () => {
               </div>
               
               <div>
-                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                <label style={{ 
+                  color: colors.mediumGray,
+                  display: 'block',
+                  marginBottom: '0.25rem',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em'
+                }}>
                   Ratio
                 </label>
                 <input
                   type="text"
                   value={calculateRatio() ? `${calculateRatio()}:1` : ''}
-                  className="w-full p-2 text-sm"
                   style={{ 
+                    width: '100%',
+                    padding: '0.5rem',
+                    fontSize: '0.875rem',
                     backgroundColor: colors.lightGray,
                     color: colors.mediumGray,
                     border: 'none'
@@ -394,10 +529,17 @@ const EspressoLogger = () => {
               </div>
               
               <div>
-                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                <label style={{ 
+                  color: colors.mediumGray,
+                  display: 'block',
+                  marginBottom: '0.25rem',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em'
+                }}>
                   Rating
                 </label>
-                <div className="flex items-center">
+                <div style={{ display: 'flex', alignItems: 'center' }}>
                   <input
                     type="range"
                     min="1"
@@ -406,28 +548,39 @@ const EspressoLogger = () => {
                     name="rating"
                     value={formData.rating}
                     onChange={handleChange}
-                    className="w-full mr-2"
-                    style={{
-                      accentColor: colors.black,
-                    }}
+                    style={{ width: '100%', marginRight: '0.5rem' }}
                   />
-                  <span style={{ color: colors.black, letterSpacing: '0.3em' }} className="text-lg font-light">
+                  <span style={{ 
+                    color: colors.black, 
+                    letterSpacing: '0.3em',
+                    fontSize: '1.125rem',
+                    fontWeight: 300
+                  }}>
                     {getRatingDisplay(formData.rating)}
                   </span>
                 </div>
               </div>
             </div>
             
-            <div className="mb-6">
-              <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ 
+                color: colors.mediumGray,
+                display: 'block',
+                marginBottom: '0.25rem',
+                fontSize: '0.75rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em'
+              }}>
                 Notes
               </label>
               <textarea
                 name="notes"
                 value={formData.notes}
                 onChange={handleChange}
-                className="w-full p-2 text-sm"
                 style={{ 
+                  width: '100%',
+                  padding: '0.5rem',
+                  fontSize: '0.875rem',
                   borderColor: colors.lightGray,
                   backgroundColor: colors.white,
                   color: colors.black
@@ -437,14 +590,21 @@ const EspressoLogger = () => {
               />
             </div>
             
-            <div className="flex">
+            <div style={{ display: 'flex' }}>
               <button
                 type="submit"
                 style={{ 
                   backgroundColor: colors.black,
-                  color: colors.white
+                  color: colors.white,
+                  padding: '0.5rem 1.5rem',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  fontWeight: 300,
+                  marginRight: '0.75rem',
+                  border: 'none',
+                  cursor: 'pointer'
                 }}
-                className="px-6 py-2 text-xs uppercase tracking-widest font-light mr-3"
                 disabled={loading}
               >
                 {editIndex !== null ? 'Update' : 'Save'}
@@ -470,9 +630,15 @@ const EspressoLogger = () => {
                   }}
                   style={{ 
                     backgroundColor: colors.lightGray,
-                    color: colors.black
+                    color: colors.black,
+                    padding: '0.5rem 1.5rem',
+                    fontSize: '0.75rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    fontWeight: 300,
+                    border: 'none',
+                    cursor: 'pointer'
                   }}
-                  className="px-6 py-2 text-xs uppercase tracking-widest font-light"
                   disabled={loading}
                 >
                   Cancel
@@ -483,20 +649,83 @@ const EspressoLogger = () => {
         )}
         
         {shots.length > 0 ? (
-          <div style={{ borderColor: colors.lightGray }} className="border">
-            <div className="overflow-x-auto">
-              <table className="w-full">
+          <div style={{ border: `1px solid ${colors.lightGray}` }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ backgroundColor: colors.black, color: colors.white }}>
-                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-left">Date</th>
-                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-left">Bean</th>
-                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-right">In</th>
-                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-right">Out</th>
-                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-right">Ratio</th>
-                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-center">Grind</th>
-                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-right">Time</th>
-                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-center">Rating</th>
-                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-center">Actions</th>
+                    <th style={{
+                      padding: '0.75rem 1rem',
+                      fontSize: '0.75rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      fontWeight: 300,
+                      textAlign: 'left'
+                    }}>Date</th>
+                    <th style={{
+                      padding: '0.75rem 1rem',
+                      fontSize: '0.75rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      fontWeight: 300,
+                      textAlign: 'left'
+                    }}>Bean</th>
+                    <th style={{
+                      padding: '0.75rem 1rem',
+                      fontSize: '0.75rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      fontWeight: 300,
+                      textAlign: 'right'
+                    }}>In</th>
+                    <th style={{
+                      padding: '0.75rem 1rem',
+                      fontSize: '0.75rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      fontWeight: 300,
+                      textAlign: 'right'
+                    }}>Out</th>
+                    <th style={{
+                      padding: '0.75rem 1rem',
+                      fontSize: '0.75rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      fontWeight: 300,
+                      textAlign: 'right'
+                    }}>Ratio</th>
+                    <th style={{
+                      padding: '0.75rem 1rem',
+                      fontSize: '0.75rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      fontWeight: 300,
+                      textAlign: 'center'
+                    }}>Grind</th>
+                    <th style={{
+                      padding: '0.75rem 1rem',
+                      fontSize: '0.75rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      fontWeight: 300,
+                      textAlign: 'right'
+                    }}>Time</th>
+                    <th style={{
+                      padding: '0.75rem 1rem',
+                      fontSize: '0.75rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      fontWeight: 300,
+                      textAlign: 'center'
+                    }}>Rating</th>
+                    <th style={{
+                      padding: '0.75rem 1rem',
+                      fontSize: '0.75rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      fontWeight: 300,
+                      textAlign: 'center'
+                    }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -508,28 +737,83 @@ const EspressoLogger = () => {
                         borderTop: `1px solid ${colors.lightGray}`
                       }}
                     >
-                      <td className="px-4 py-3 text-sm" style={{ color: colors.black }}>{shot.date}</td>
-                      <td className="px-4 py-3 text-sm" style={{ color: colors.black }}>{shot.beanName || "—"}</td>
-                      <td className="px-4 py-3 text-sm text-right" style={{ color: colors.black }}>{shot.coffeeIn}g</td>
-                      <td className="px-4 py-3 text-sm text-right" style={{ color: colors.black }}>{shot.espressoOut}g</td>
-                      <td className="px-4 py-3 text-sm text-right" style={{ color: colors.black }}>{getRatioForShot(shot)}</td>
-                      <td className="px-4 py-3 text-sm text-center" style={{ color: colors.black }}>{shot.grindSize}</td>
-                      <td className="px-4 py-3 text-sm text-right" style={{ color: colors.black }}>{shot.extractionTime}s</td>
-                      <td className="px-4 py-3 text-sm text-center" style={{ color: colors.black, letterSpacing: '0.2em' }}>{getRatingDisplay(shot.rating)}</td>
-                      <td className="px-4 py-3 text-sm">
-                        <div className="flex justify-center space-x-2">
+                      <td style={{
+                        padding: '0.75rem 1rem',
+                        fontSize: '0.875rem',
+                        color: colors.black
+                      }}>{shot.date}</td>
+                      <td style={{
+                        padding: '0.75rem 1rem',
+                        fontSize: '0.875rem',
+                        color: colors.black
+                      }}>{shot.beanName || "—"}</td>
+                      <td style={{
+                        padding: '0.75rem 1rem',
+                        fontSize: '0.875rem',
+                        color: colors.black,
+                        textAlign: 'right'
+                      }}>{shot.coffeeIn}g</td>
+                      <td style={{
+                        padding: '0.75rem 1rem',
+                        fontSize: '0.875rem',
+                        color: colors.black,
+                        textAlign: 'right'
+                      }}>{shot.espressoOut}g</td>
+                      <td style={{
+                        padding: '0.75rem 1rem',
+                        fontSize: '0.875rem',
+                        color: colors.black,
+                        textAlign: 'right'
+                      }}>{getRatioForShot(shot)}</td>
+                      <td style={{
+                        padding: '0.75rem 1rem',
+                        fontSize: '0.875rem',
+                        color: colors.black,
+                        textAlign: 'center'
+                      }}>{shot.grindSize}</td>
+                      <td style={{
+                        padding: '0.75rem 1rem',
+                        fontSize: '0.875rem',
+                        color: colors.black,
+                        textAlign: 'right'
+                      }}>{shot.extractionTime}s</td>
+                      <td style={{
+                        padding: '0.75rem 1rem',
+                        fontSize: '0.875rem',
+                        color: colors.black,
+                        textAlign: 'center',
+                        letterSpacing: '0.2em'
+                      }}>{getRatingDisplay(shot.rating)}</td>
+                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.875rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
                           <button
                             onClick={() => handleEdit(index)}
-                            style={{ backgroundColor: colors.lightGray, color: colors.black }}
-                            className="px-3 py-1 text-xs uppercase tracking-wider"
+                            style={{ 
+                              backgroundColor: colors.lightGray, 
+                              color: colors.black,
+                              padding: '0.25rem 0.75rem',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.1em',
+                              border: 'none',
+                              cursor: 'pointer'
+                            }}
                             disabled={loading}
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDelete(index)}
-                            style={{ backgroundColor: colors.black, color: colors.white }}
-                            className="px-3 py-1 text-xs uppercase tracking-wider"
+                            style={{ 
+                              backgroundColor: colors.black, 
+                              color: colors.white,
+                              padding: '0.25rem 0.75rem',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.1em',
+                              border: 'none',
+                              cursor: 'pointer'
+                            }}
                             disabled={loading}
                           >
                             Delete
@@ -543,14 +827,36 @@ const EspressoLogger = () => {
             </div>
           </div>
         ) : !loading && (
-          <div style={{ border: `1px solid ${colors.lightGray}`, backgroundColor: colors.white }} className="flex flex-col items-center justify-center py-16">
-            <p style={{ color: colors.mediumGray }} className="text-sm uppercase tracking-widest mb-2">No shots recorded</p>
-            <p style={{ color: colors.lightGray }} className="text-xs">Click "New Entry" to begin</p>
+          <div style={{ 
+            border: `1px solid ${colors.lightGray}`, 
+            backgroundColor: colors.white,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '4rem 0'
+          }}>
+            <p style={{ 
+              color: colors.mediumGray,
+              fontSize: '0.875rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginBottom: '0.5rem'
+            }}>No shots recorded</p>
+            <p style={{ 
+              color: colors.lightGray,
+              fontSize: '0.75rem'
+            }}>Click "New Entry" to begin</p>
           </div>
         )}
         
-        <footer className="mt-12 text-center">
-          <p style={{ color: colors.mediumGray }} className="text-xs uppercase tracking-wider">
+        <footer style={{ marginTop: '3rem', textAlign: 'center' }}>
+          <p style={{ 
+            color: colors.mediumGray,
+            fontSize: '0.75rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em'
+          }}>
             % Espresso Logger
           </p>
         </footer>
