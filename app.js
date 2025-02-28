@@ -1,4 +1,6 @@
-// Firebase Configuration - using compat version for direct browser usage
+import React, { useState, useEffect } from 'react';
+
+// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBPp-evesGdf93i6Ms5770qiL4Smdnxo3c",
   authDomain: "espresso-logger-c6a6d.firebaseapp.com",
@@ -13,15 +15,15 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 const EspressoLogger = () => {
-  // Coffee-themed color palette
+  // Minimalist monochrome color palette inspired by % Arabica
   const colors = {
-    darkBrown: "#3E2723", // Dark roast
-    mediumBrown: "#5D4037", // Medium roast
-    lightBrown: "#8D6E63", // Light roast
-    cream: "#D7CCC8", // Cream
-    crema: "#FFCC80", // Crema color
-    background: "#EFEBE9", // Coffee paper
-    accent: "#D4A76A" // Golden crema
+    black: "#000000",
+    darkGray: "#333333",
+    mediumGray: "#666666",
+    lightGray: "#E0E0E0",
+    offWhite: "#F5F5F5",
+    white: "#FFFFFF",
+    accent: "#BBBBBB" // Subtle accent
   };
 
   // State management
@@ -183,90 +185,116 @@ const EspressoLogger = () => {
     }
   };
 
-  const getRatingEmoji = (rating) => {
+  const getRatingDisplay = (rating) => {
     const ratingNum = parseInt(rating) || 0;
-    switch(ratingNum) {
-      case 1: return '😖';
-      case 2: return '😕';
-      case 3: return '😐';
-      case 4: return '😊';
-      case 5: return '😍';
-      default: return '🤔';
+    // Simple visual indicator instead of emojis
+    const filled = '●';
+    const empty = '○';
+    let display = '';
+    
+    for (let i = 1; i <= 5; i++) {
+      display += i <= ratingNum ? filled : empty;
     }
+    
+    return display;
   };
 
   return (
-    <div style={{ backgroundColor: colors.background }} className="espresso-app">
-      <div className="app-container">
-        <h1 className="app-title" style={{ color: colors.darkBrown }}>
-          ☕ Espresso Shot Logger ☕
-        </h1>
+    <div style={{ backgroundColor: colors.white, minHeight: '100vh' }} className="espresso-logger">
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        <header className="mb-12 pt-4">
+          <h1 style={{ color: colors.black, letterSpacing: '0.05em' }} className="text-4xl font-light uppercase tracking-widest text-center relative">
+            <span className="position-relative">
+              % <span style={{ letterSpacing: '0.2em' }}>ESPRESSO</span>
+            </span>
+          </h1>
+          <p style={{ color: colors.mediumGray }} className="text-center text-sm uppercase tracking-widest mt-1">
+            Shot Logger
+          </p>
+        </header>
         
         {loading && (
-          <div className="loading-indicator">
-            <div className="spinner"></div>
-            <p>Syncing your shots...</p>
+          <div className="flex justify-center items-center my-8">
+            <div style={{ borderTopColor: colors.black }} className="border-2 border-gray-300 h-6 w-6 rounded-full animate-spin"></div>
+            <span className="ml-2 text-sm tracking-wide uppercase" style={{ color: colors.mediumGray }}>Syncing</span>
           </div>
         )}
         
         {error && (
-          <div className="error-message">
+          <div style={{ backgroundColor: colors.offWhite, color: colors.black, border: `1px solid ${colors.lightGray}` }} className="p-4 mb-6 text-sm">
             <p>{error}</p>
           </div>
         )}
         
-        <div className="button-row">
+        <div className="flex justify-between items-center mb-8">
           <button 
             onClick={() => {
               setIsFormVisible(!isFormVisible);
               if (!isFormVisible) setError('');
             }} 
-            className="new-shot-btn"
-            style={{ backgroundColor: colors.mediumBrown }}
+            style={{ 
+              backgroundColor: isFormVisible ? colors.lightGray : colors.black,
+              color: isFormVisible ? colors.black : colors.white
+            }} 
+            className="px-4 py-2 text-xs uppercase tracking-widest font-light"
           >
-            {isFormVisible ? 'Cancel' : '➕ New Shot'}
+            {isFormVisible ? 'Cancel' : 'New Entry'}
           </button>
           
-          <div className="shot-counter" style={{ color: colors.darkBrown, backgroundColor: colors.cream }}>
-            {shots.length} {shots.length === 1 ? 'shot' : 'shots'} pulled 🎯
+          <div style={{ color: colors.mediumGray }} className="text-xs uppercase tracking-wider">
+            {shots.length} {shots.length === 1 ? 'shot' : 'shots'} recorded
           </div>
         </div>
         
         {isFormVisible && (
-          <form onSubmit={handleSubmit} className="shot-form" style={{ backgroundColor: colors.cream }}>
-            <h2 className="form-title" style={{ color: colors.darkBrown }}>
-              {editIndex !== null ? '✏️ Edit Shot' : '➕ New Shot'}
+          <form onSubmit={handleSubmit} style={{ backgroundColor: colors.offWhite }} className="mb-12 p-6">
+            <h2 style={{ color: colors.black }} className="text-sm uppercase tracking-widest mb-6 font-light">
+              {editIndex !== null ? 'Edit Shot' : 'New Shot'}
             </h2>
             
-            <div className="form-grid">
-              <div className="form-group">
-                <label>📅 Date</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                  Date
+                </label>
                 <input
                   type="date"
                   name="date"
                   value={formData.date}
                   onChange={handleChange}
-                  className="form-input"
-                  style={{ borderColor: colors.lightBrown }}
+                  className="w-full p-2 text-sm"
+                  style={{ 
+                    borderColor: colors.lightGray,
+                    backgroundColor: colors.white,
+                    color: colors.black
+                  }}
                   required
                 />
               </div>
               
-              <div className="form-group">
-                <label>🫘 Bean Name</label>
+              <div>
+                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                  Bean Origin
+                </label>
                 <input
                   type="text"
                   name="beanName"
                   value={formData.beanName}
                   onChange={handleChange}
-                  className="form-input"
-                  style={{ borderColor: colors.lightBrown }}
+                  className="w-full p-2 text-sm"
+                  style={{ 
+                    borderColor: colors.lightGray,
+                    backgroundColor: colors.white,
+                    color: colors.black
+                  }}
                   placeholder="Ethiopia Yirgacheffe"
                 />
               </div>
               
-              <div className="form-group">
-                <label>⚖️ Coffee In (g)</label>
+              <div>
+                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                  Dose (g)
+                </label>
                 <input
                   type="number"
                   step="0.1"
@@ -274,15 +302,21 @@ const EspressoLogger = () => {
                   name="coffeeIn"
                   value={formData.coffeeIn}
                   onChange={handleChange}
-                  className="form-input"
-                  style={{ borderColor: colors.lightBrown }}
+                  className="w-full p-2 text-sm"
+                  style={{ 
+                    borderColor: colors.lightGray,
+                    backgroundColor: colors.white,
+                    color: colors.black
+                  }}
                   placeholder="18.0"
                   required
                 />
               </div>
               
-              <div className="form-group">
-                <label>🥤 Espresso Out (g)</label>
+              <div>
+                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                  Yield (g)
+                </label>
                 <input
                   type="number"
                   step="0.1"
@@ -290,56 +324,80 @@ const EspressoLogger = () => {
                   name="espressoOut"
                   value={formData.espressoOut}
                   onChange={handleChange}
-                  className="form-input"
-                  style={{ borderColor: colors.lightBrown }}
+                  className="w-full p-2 text-sm"
+                  style={{ 
+                    borderColor: colors.lightGray,
+                    backgroundColor: colors.white,
+                    color: colors.black
+                  }}
                   placeholder="36.0"
                   required
                 />
               </div>
               
-              <div className="form-group">
-                <label>🔄 Grind Size</label>
+              <div>
+                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                  Grind Setting
+                </label>
                 <input
                   type="text"
                   name="grindSize"
                   value={formData.grindSize}
                   onChange={handleChange}
-                  className="form-input"
-                  style={{ borderColor: colors.lightBrown }}
+                  className="w-full p-2 text-sm"
+                  style={{ 
+                    borderColor: colors.lightGray,
+                    backgroundColor: colors.white,
+                    color: colors.black
+                  }}
                   placeholder="2.5"
                   required
                 />
               </div>
               
-              <div className="form-group">
-                <label>⏱️ Extraction Time (sec)</label>
+              <div>
+                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                  Time (sec)
+                </label>
                 <input
                   type="number"
                   min="1"
                   name="extractionTime"
                   value={formData.extractionTime}
                   onChange={handleChange}
-                  className="form-input"
-                  style={{ borderColor: colors.lightBrown }}
+                  className="w-full p-2 text-sm"
+                  style={{ 
+                    borderColor: colors.lightGray,
+                    backgroundColor: colors.white,
+                    color: colors.black
+                  }}
                   placeholder="30"
                   required
                 />
               </div>
               
-              <div className="form-group">
-                <label>🧮 Ratio (out:in)</label>
+              <div>
+                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                  Ratio
+                </label>
                 <input
                   type="text"
                   value={calculateRatio() ? `${calculateRatio()}:1` : ''}
-                  className="form-input"
-                  style={{ backgroundColor: colors.background, borderColor: colors.lightBrown }}
+                  className="w-full p-2 text-sm"
+                  style={{ 
+                    backgroundColor: colors.lightGray,
+                    color: colors.mediumGray,
+                    border: 'none'
+                  }}
                   disabled
                 />
               </div>
               
-              <div className="form-group">
-                <label>⭐ Rating</label>
-                <div className="rating-container">
+              <div>
+                <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                  Rating
+                </label>
+                <div className="flex items-center">
                   <input
                     type="range"
                     min="1"
@@ -348,34 +406,48 @@ const EspressoLogger = () => {
                     name="rating"
                     value={formData.rating}
                     onChange={handleChange}
-                    className="rating-slider"
+                    className="w-full mr-2"
+                    style={{
+                      accentColor: colors.black,
+                    }}
                   />
-                  <span className="rating-emoji">{getRatingEmoji(formData.rating)}</span>
+                  <span style={{ color: colors.black, letterSpacing: '0.3em' }} className="text-lg font-light">
+                    {getRatingDisplay(formData.rating)}
+                  </span>
                 </div>
               </div>
             </div>
             
-            <div className="form-group">
-              <label>📝 Notes</label>
+            <div className="mb-6">
+              <label style={{ color: colors.mediumGray }} className="block mb-1 text-xs uppercase tracking-wider">
+                Notes
+              </label>
               <textarea
                 name="notes"
                 value={formData.notes}
                 onChange={handleChange}
-                className="form-textarea"
-                style={{ borderColor: colors.lightBrown }}
-                placeholder="Taste notes, adjustments needed, etc."
+                className="w-full p-2 text-sm"
+                style={{ 
+                  borderColor: colors.lightGray,
+                  backgroundColor: colors.white,
+                  color: colors.black
+                }}
+                placeholder="Tasting notes, observations, improvements..."
                 rows="3"
               />
             </div>
             
-            <div className="form-actions">
+            <div className="flex">
               <button
                 type="submit"
-                className="save-btn"
-                style={{ backgroundColor: colors.accent }}
+                style={{ 
+                  backgroundColor: colors.black,
+                  color: colors.white
+                }}
+                className="px-6 py-2 text-xs uppercase tracking-widest font-light mr-3"
                 disabled={loading}
               >
-                {editIndex !== null ? '✅ Update Shot' : '✅ Save Shot'}
+                {editIndex !== null ? 'Update' : 'Save'}
               </button>
               
               {editIndex !== null && (
@@ -396,10 +468,14 @@ const EspressoLogger = () => {
                     });
                     setError('');
                   }}
-                  className="cancel-btn"
+                  style={{ 
+                    backgroundColor: colors.lightGray,
+                    color: colors.black
+                  }}
+                  className="px-6 py-2 text-xs uppercase tracking-widest font-light"
                   disabled={loading}
                 >
-                  ❌ Cancel
+                  Cancel
                 </button>
               )}
             </div>
@@ -407,67 +483,77 @@ const EspressoLogger = () => {
         )}
         
         {shots.length > 0 ? (
-          <div className="table-container">
-            <table className="shots-table">
-              <thead>
-                <tr style={{ backgroundColor: colors.darkBrown, color: 'white' }}>
-                  <th>📅 Date</th>
-                  <th>🫘 Bean</th>
-                  <th>⚖️ In</th>
-                  <th>🥤 Out</th>
-                  <th>🧮 Ratio</th>
-                  <th>🔄 Grind</th>
-                  <th>⏱️ Time</th>
-                  <th>⭐ Rating</th>
-                  <th>🔧 Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {shots.map((shot, index) => {
-                  // Alternate row colors
-                  const rowColor = index % 2 === 0 ? 'white' : colors.background;
-                  
-                  return (
-                    <tr key={shot.id || index} style={{ backgroundColor: rowColor }} className="table-row">
-                      <td>{shot.date}</td>
-                      <td>{shot.beanName || "—"}</td>
-                      <td>{shot.coffeeIn}g</td>
-                      <td>{shot.espressoOut}g</td>
-                      <td>{getRatioForShot(shot)}</td>
-                      <td>{shot.grindSize}</td>
-                      <td>{shot.extractionTime}s</td>
-                      <td className="rating-cell">{getRatingEmoji(shot.rating)}</td>
-                      <td>
-                        <div className="action-buttons">
+          <div style={{ borderColor: colors.lightGray }} className="border">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr style={{ backgroundColor: colors.black, color: colors.white }}>
+                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-left">Date</th>
+                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-left">Bean</th>
+                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-right">In</th>
+                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-right">Out</th>
+                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-right">Ratio</th>
+                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-center">Grind</th>
+                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-right">Time</th>
+                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-center">Rating</th>
+                    <th className="px-4 py-3 text-xs uppercase tracking-wider font-light text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shots.map((shot, index) => (
+                    <tr 
+                      key={shot.id || index} 
+                      style={{ 
+                        backgroundColor: index % 2 === 0 ? colors.white : colors.offWhite,
+                        borderTop: `1px solid ${colors.lightGray}`
+                      }}
+                    >
+                      <td className="px-4 py-3 text-sm" style={{ color: colors.black }}>{shot.date}</td>
+                      <td className="px-4 py-3 text-sm" style={{ color: colors.black }}>{shot.beanName || "—"}</td>
+                      <td className="px-4 py-3 text-sm text-right" style={{ color: colors.black }}>{shot.coffeeIn}g</td>
+                      <td className="px-4 py-3 text-sm text-right" style={{ color: colors.black }}>{shot.espressoOut}g</td>
+                      <td className="px-4 py-3 text-sm text-right" style={{ color: colors.black }}>{getRatioForShot(shot)}</td>
+                      <td className="px-4 py-3 text-sm text-center" style={{ color: colors.black }}>{shot.grindSize}</td>
+                      <td className="px-4 py-3 text-sm text-right" style={{ color: colors.black }}>{shot.extractionTime}s</td>
+                      <td className="px-4 py-3 text-sm text-center" style={{ color: colors.black, letterSpacing: '0.2em' }}>{getRatingDisplay(shot.rating)}</td>
+                      <td className="px-4 py-3 text-sm">
+                        <div className="flex justify-center space-x-2">
                           <button
                             onClick={() => handleEdit(index)}
-                            className="edit-btn"
-                            style={{ backgroundColor: colors.accent }}
+                            style={{ backgroundColor: colors.lightGray, color: colors.black }}
+                            className="px-3 py-1 text-xs uppercase tracking-wider"
                             disabled={loading}
                           >
-                            ✏️ Edit
+                            Edit
                           </button>
                           <button
                             onClick={() => handleDelete(index)}
-                            className="delete-btn"
+                            style={{ backgroundColor: colors.black, color: colors.white }}
+                            className="px-3 py-1 text-xs uppercase tracking-wider"
                             disabled={loading}
                           >
-                            🗑️ Delete
+                            Delete
                           </button>
                         </div>
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : !loading && (
-          <div className="empty-state">
-            <p className="empty-title" style={{ color: colors.mediumBrown }}>No shots logged yet ☕</p>
-            <p className="empty-subtitle" style={{ color: colors.lightBrown }}>Click 'New Shot' to start tracking your espresso journey!</p>
+          <div style={{ border: `1px solid ${colors.lightGray}`, backgroundColor: colors.white }} className="flex flex-col items-center justify-center py-16">
+            <p style={{ color: colors.mediumGray }} className="text-sm uppercase tracking-widest mb-2">No shots recorded</p>
+            <p style={{ color: colors.lightGray }} className="text-xs">Click "New Entry" to begin</p>
           </div>
         )}
+        
+        <footer className="mt-12 text-center">
+          <p style={{ color: colors.mediumGray }} className="text-xs uppercase tracking-wider">
+            % Espresso Logger
+          </p>
+        </footer>
       </div>
     </div>
   );
