@@ -2,7 +2,6 @@
 layout: default
 title: Blog
 ---
-
 <div class="blog-index">
   <h1 class="page-heading">Latest Posts</h1>
   
@@ -12,7 +11,7 @@ title: Blog
         <h2 class="post-title">
           <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
         </h2>
-        <div class="post-meta">{{ post.date | date: "%B %d, %Y" }}</div>
+        <div class="post-meta">{{ page.date | date: "%B %d, %Y" }}</div>
         <div class="post-excerpt">
           {{ post.excerpt }}
         </div>
