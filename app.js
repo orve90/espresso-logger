@@ -319,142 +319,171 @@ function viewNotes(notes) {
 // Render function
 function render() {
   app.innerHTML = `
-    <div class="container">
-      <header>
-        <h1 class="app-title">% <span>ESPRESSO</span></h1>
-        <p class="app-subtitle">Shot Logger</p>
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+      <header style="margin: 40px 0 20px;">
+        <h1 style="font-size: 36px; font-weight: 300; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">% <span style="letter-spacing: 0.2em;">ESPRESSO</span></h1>
+        <p style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.2em; color: #666; margin: 10px 0 0;">Shot Logger</p>
       </header>
       
       ${state.loading ? `
-        <div class="loading">
-          <div class="spinner"></div>
-          <span class="loading-text">Syncing</span>
+        <div style="display: flex; justify-content: center; padding: 20px;">
+          <div style="border: 2px solid #e0e0e0; border-top: 2px solid #000; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin-right: 10px;"></div>
+          <span style="font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; color: #666;">Syncing</span>
         </div>
       ` : ''}
       
       ${state.error ? `
-        <div class="error-message">
+        <div style="background-color: #f5f5f5; border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 20px; font-size: 14px;">
           <p>${state.error}</p>
         </div>
       ` : ''}
       
-      <div class="controls">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div>
-          <button id="toggle-form" class="btn ${state.isFormVisible ? 'btn-secondary' : ''}">
+          <button id="toggle-form" style="
+            padding: 8px 16px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 300;
+            border: none;
+            cursor: pointer;
+            background-color: ${state.isFormVisible ? '#e0e0e0' : '#000'};
+            color: ${state.isFormVisible ? '#000' : '#fff'};
+          ">
             ${state.isFormVisible ? 'Cancel' : 'New Entry'}
           </button>
           
           ${!state.isFormVisible && state.shots.length > 0 ? `
-            <button id="export-excel" class="btn btn-secondary" style="margin-left: 0.5rem;">
+            <button id="export-excel" style="
+              padding: 8px 16px;
+              font-size: 12px;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              font-weight: 300;
+              border: none;
+              cursor: pointer;
+              background-color: #e0e0e0;
+              color: #000;
+              margin-left: 8px;
+            ">
               Export
             </button>
           ` : ''}
         </div>
         
-        <div class="shot-counter">
+        <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #666;">
           ${state.shots.length} ${state.shots.length === 1 ? 'shot' : 'shots'} recorded
         </div>
       </div>
       
       ${state.isFormVisible ? `
-        <form id="shot-form" class="form">
-          <h2 class="form-title">
+        <form id="shot-form" style="background-color: #f5f5f5; padding: 24px; margin-bottom: 40px;">
+          <h2 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0; margin-bottom: 24px; font-weight: 300;">
             ${state.editIndex !== null ? 'Edit Shot' : 'New Shot'}
           </h2>
           
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label">Date</label>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 24px; margin-bottom: 24px;">
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #666;">Date</label>
               <input
                 type="date"
                 name="date"
                 value="${state.formData.date}"
-                class="form-control"
+                style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #e0e0e0; background-color: #fff; font-family: inherit;"
                 required
               />
             </div>
             
-            <div class="form-group">
-              <label class="form-label">Bean Origin</label>
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #666;">Bean Origin</label>
               <input
                 type="text"
                 name="beanName"
                 value="${state.formData.beanName || ''}"
-                class="form-control"
+                style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #e0e0e0; background-color: #fff; font-family: inherit;"
                 placeholder="Ethiopia Yirgacheffe"
               />
             </div>
             
-            <div class="form-group">
-              <label class="form-label">Dose (g)</label>
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #666;">Dose (g)</label>
               <input
                 type="number"
                 step="0.1"
                 min="0.1"
                 name="coffeeIn"
                 value="${state.formData.coffeeIn || ''}"
-                class="form-control"
+                style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #e0e0e0; background-color: #fff; font-family: inherit;"
                 placeholder="18.0"
                 required
               />
             </div>
             
-            <div class="form-group">
-              <label class="form-label">Yield (g)</label>
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #666;">Yield (g)</label>
               <input
                 type="number"
                 step="0.1"
                 min="0"
                 name="espressoOut"
                 value="${state.formData.espressoOut || ''}"
-                class="form-control"
+                style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #e0e0e0; background-color: #fff; font-family: inherit;"
                 placeholder="36.0"
                 required
               />
             </div>
             
-            <div class="form-group">
-              <label class="form-label">Grind Setting</label>
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #666;">Grind Setting</label>
               <input
                 type="text"
                 name="grindSize"
                 value="${state.formData.grindSize || ''}"
-                class="form-control"
+                style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #e0e0e0; background-color: #fff; font-family: inherit;"
                 placeholder="2.5"
                 required
               />
             </div>
             
-            <div class="form-group">
-              <label class="form-label">Time (sec)</label>
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #666;">Time (sec)</label>
               <input
                 type="number"
                 min="1"
                 name="extractionTime"
                 value="${state.formData.extractionTime || ''}"
-                class="form-control"
+                style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #e0e0e0; background-color: #fff; font-family: inherit;"
                 placeholder="30"
                 required
               />
             </div>
             
-            <div class="form-group">
-              <label class="form-label">Ratio</label>
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #666;">Ratio</label>
               <input
                 type="text"
                 value="${calculateRatio(state.formData.coffeeIn, state.formData.espressoOut) ? `${calculateRatio(state.formData.coffeeIn, state.formData.espressoOut)}:1` : ''}"
-                class="form-control"
+                style="width: 100%; padding: 8px; font-size: 14px; background-color: #e0e0e0; color: #666; border: none; font-family: inherit;"
                 disabled
               />
             </div>
             
-            <div class="form-group">
-              <label class="form-label">Rating</label>
-              <div class="rating-dots">
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #666;">Rating</label>
+              <div style="display: flex; align-items: center; gap: 16px; margin-top: 8px;">
                 ${[1, 2, 3, 4, 5].map(num => `
                   <div 
                     data-rating="${num}" 
-                    class="rating-dot ${parseInt(state.formData.rating) >= num ? 'active' : ''}"
+                    class="rating-dot" 
+                    style="
+                      width: 16px; 
+                      height: 16px; 
+                      border-radius: 50%; 
+                      background-color: ${parseInt(state.formData.rating) >= num ? '#000' : '#e0e0e0'};
+                      cursor: pointer;
+                      transition: background-color 0.2s ease;
+                    "
                   ></div>
                 `).join('')}
                 <input type="hidden" name="rating" id="rating-input" value="${state.formData.rating || 3}">
@@ -462,11 +491,11 @@ function render() {
             </div>
           </div>
           
-          <div class="form-group">
-            <label class="form-label">Notes</label>
+          <div style="margin-bottom: 24px;">
+            <label style="display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #666;">Notes</label>
             <textarea
               name="notes"
-              class="form-control"
+              style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #e0e0e0; background-color: #fff; font-family: inherit; resize: vertical;"
               placeholder="Tasting notes, observations, improvements..."
               rows="3"
             >${state.formData.notes || ''}</textarea>
@@ -475,7 +504,18 @@ function render() {
           <div style="display: flex;">
             <button
               type="submit"
-              class="btn"
+              style="
+                padding: 8px 24px;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                font-weight: 300;
+                border: none;
+                cursor: pointer;
+                background-color: #000;
+                color: #fff;
+                ${state.loading ? 'opacity: 0.5; cursor: not-allowed;' : ''}
+              "
               ${state.loading ? 'disabled' : ''}
             >
               ${state.editIndex !== null ? 'Update' : 'Save'}
@@ -485,8 +525,19 @@ function render() {
               <button
                 type="button"
                 id="cancel-edit"
-                class="btn btn-secondary"
-                style="margin-left: 1rem;"
+                style="
+                  padding: 8px 24px;
+                  font-size: 12px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.1em;
+                  font-weight: 300;
+                  border: none;
+                  cursor: pointer;
+                  background-color: #e0e0e0;
+                  color: #000;
+                  margin-left: 12px;
+                  ${state.loading ? 'opacity: 0.5; cursor: not-allowed;' : ''}
+                "
                 ${state.loading ? 'disabled' : ''}
               >
                 Cancel
@@ -497,54 +548,78 @@ function render() {
       ` : ''}
       
       ${state.shots.length > 0 ? `
-        <div class="table-container">
-          <table>
+        <div style="border: 1px solid #e0e0e0; overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse;">
             <thead>
-              <tr>
-                <th>Date</th>
-                <th>Bean</th>
-                <th class="text-right">In</th>
-                <th class="text-right">Out</th>
-                <th class="text-right">Ratio</th>
-                <th class="text-center">Grind</th>
-                <th class="text-right">Time</th>
-                <th class="text-center">Rating</th>
-                <th>Notes</th>
-                <th class="text-center">Actions</th>
+              <tr style="background-color: #000; color: #fff;">
+                <th style="padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 300; text-align: left;">Date</th>
+                <th style="padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 300; text-align: left;">Bean</th>
+                <th style="padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 300; text-align: right;">In</th>
+                <th style="padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 300; text-align: right;">Out</th>
+                <th style="padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 300; text-align: right;">Ratio</th>
+                <th style="padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 300; text-align: center;">Grind</th>
+                <th style="padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 300; text-align: right;">Time</th>
+                <th style="padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 300; text-align: center;">Rating</th>
+                <th style="padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 300; text-align: left;">Notes</th>
+                <th style="padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 300; text-align: center;">Actions</th>
               </tr>
             </thead>
             <tbody>
               ${state.shots.map((shot, index) => `
-                <tr>
-                  <td>${shot.date}</td>
-                  <td>${shot.beanName || "—"}</td>
-                  <td class="text-right">${shot.coffeeIn}g</td>
-                  <td class="text-right">${shot.espressoOut}g</td>
-                  <td class="text-right">${getRatioForShot(shot)}</td>
-                  <td class="text-center">${shot.grindSize}</td>
-                  <td class="text-right">${shot.extractionTime}s</td>
-                  <td class="text-center" style="letter-spacing: 0.2em;">${getRatingDisplay(shot.rating)}</td>
-                  <td>
+                <tr style="background-color: ${index % 2 === 0 ? '#fff' : '#f5f5f5'}; border-top: 1px solid #e0e0e0;">
+                  <td style="padding: 12px 16px; font-size: 14px;">${shot.date}</td>
+                  <td style="padding: 12px 16px; font-size: 14px;">${shot.beanName || "—"}</td>
+                  <td style="padding: 12px 16px; font-size: 14px; text-align: right;">${shot.coffeeIn}g</td>
+                  <td style="padding: 12px 16px; font-size: 14px; text-align: right;">${shot.espressoOut}g</td>
+                  <td style="padding: 12px 16px; font-size: 14px; text-align: right;">${getRatioForShot(shot)}</td>
+                  <td style="padding: 12px 16px; font-size: 14px; text-align: center;">${shot.grindSize}</td>
+                  <td style="padding: 12px 16px; font-size: 14px; text-align: right;">${shot.extractionTime}s</td>
+                  <td style="padding: 12px 16px; font-size: 14px; text-align: center; letter-spacing: 0.2em;">${getRatingDisplay(shot.rating)}</td>
+                  <td style="padding: 12px 16px; font-size: 14px;">
                     ${shot.notes ? 
-                      `<button class="notes-btn" data-notes="${shot.notes.replace(/"/g, '&quot;')}">View</button>` : 
+                      `<button 
+                        class="notes-btn" 
+                        data-notes="${shot.notes.replace(/"/g, '&quot;')}" 
+                        style="background: none; border: none; cursor: pointer; color: #000; text-decoration: underline; padding: 0; font-size: 14px; font-family: inherit;"
+                      >View</button>` : 
                       '—'}
                   </td>
-                  <td>
-                    <div class="action-buttons">
+                  <td style="padding: 12px 16px; font-size: 14px;">
+                    <div style="display: flex; justify-content: center; gap: 8px;">
                       <button
-                        class="btn btn-secondary"
-                        style="padding: 0.25rem 0.75rem; font-size: 0.75rem;"
                         data-action="edit"
                         data-index="${index}"
+                        style="
+                          background-color: #e0e0e0;
+                          color: #000;
+                          padding: 4px 12px;
+                          font-size: 12px;
+                          text-transform: uppercase;
+                          letter-spacing: 0.1em;
+                          border: none;
+                          cursor: pointer;
+                          font-family: inherit;
+                          ${state.loading ? 'opacity: 0.5; cursor: not-allowed;' : ''}
+                        "
                         ${state.loading ? 'disabled' : ''}
                       >
                         Edit
                       </button>
                       <button
-                        class="btn"
-                        style="padding: 0.25rem 0.75rem; font-size: 0.75rem;"
                         data-action="delete"
                         data-index="${index}"
+                        style="
+                          background-color: #000;
+                          color: #fff;
+                          padding: 4px 12px;
+                          font-size: 12px;
+                          text-transform: uppercase;
+                          letter-spacing: 0.1em;
+                          border: none;
+                          cursor: pointer;
+                          font-family: inherit;
+                          ${state.loading ? 'opacity: 0.5; cursor: not-allowed;' : ''}
+                        "
                         ${state.loading ? 'disabled' : ''}
                       >
                         Delete
@@ -557,16 +632,81 @@ function render() {
           </table>
         </div>
       ` : !state.loading ? `
-        <div class="empty-state">
-          <p class="empty-title">No shots recorded</p>
-          <p class="empty-subtitle">Click "New Entry" to begin</p>
+        <div style="
+          border: 1px solid #e0e0e0;
+          background-color: #fff;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 64px 0;
+        ">
+          <p style="color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">No shots recorded</p>
+          <p style="color: #e0e0e0; font-size: 12px;">Click "New Entry" to begin</p>
         </div>
       ` : ''}
       
-      <footer>
-        <p class="footer-text">% Espresso Logger</p>
+      <footer style="margin-top: 40px; text-align: center;">
+        <p style="color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">% Espresso Logger</p>
       </footer>
     </div>
+    
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      /* Notes modal styles */
+      .notes-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      
+      .notes-modal-content {
+        background-color: white;
+        width: 80%;
+        max-width: 600px;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      
+      .notes-modal-header {
+        padding: 16px;
+        border-bottom: 1px solid #E0E0E0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .notes-modal-header h2 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 300;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      
+      .close-modal {
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+      }
+      
+      .notes-modal-body {
+        padding: 16px;
+        max-height: 60vh;
+        overflow-y: auto;
+      }
+    </style>
   `;
   
   // Add event listeners
@@ -592,9 +732,9 @@ function render() {
         // Update active state of dots
         document.querySelectorAll('.rating-dot').forEach(d => {
           if (parseInt(d.getAttribute('data-rating')) <= parseInt(rating)) {
-            d.classList.add('active');
+            d.style.backgroundColor = '#d.style.backgroundColor = '#000';
           } else {
-            d.classList.remove('active');
+            d.style.backgroundColor = '#e0e0e0';
           }
         });
       });
