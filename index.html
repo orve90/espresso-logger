@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>% ESPRESSO Logger</title>
+    <title>DIAL YOUR ESPRESSO - Shot Logger</title>
     
     <!-- Firebase scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -32,6 +32,7 @@
         
         header {
             margin: 40px 0 20px;
+            text-align: center;
         }
         
         .app-title {
@@ -40,10 +41,6 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin: 0;
-        }
-        
-        .app-title span {
-            letter-spacing: 0.2em;
         }
         
         .app-subtitle {
@@ -180,14 +177,11 @@
             padding: 12px 16px;
             font-size: 14px;
             border-top: 1px solid #e0e0e0;
+            text-align: left;
         }
         
         tr:nth-child(even) {
             background-color: #f5f5f5;
-        }
-        
-        .text-right {
-            text-align: right;
         }
         
         .text-center {
@@ -196,7 +190,7 @@
         
         .action-buttons {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 8px;
         }
         
@@ -209,6 +203,7 @@
             padding: 0;
             font-size: 14px;
             font-family: inherit;
+            text-align: left;
         }
         
         .empty-state {
@@ -656,12 +651,17 @@
           });
         }
 
+        // Get current year for copyright
+        function getCurrentYear() {
+          return new Date().getFullYear();
+        }
+
         // Render function
         function render() {
           app.innerHTML = `
             <header>
-              <h1 class="app-title">% <span>ESPRESSO</span></h1>
-              <p class="app-subtitle">Shot Logger</p>
+              <h1 class="app-title">DIAL YOUR ESPRESSO</h1>
+              <p class="app-subtitle">SHOT LOGGER</p>
             </header>
             
             ${state.loading ? `
@@ -842,14 +842,14 @@
                     <tr>
                       <th>Date</th>
                       <th>Bean</th>
-                      <th class="text-right">In</th>
-                      <th class="text-right">Out</th>
-                      <th class="text-right">Ratio</th>
-                      <th class="text-center">Grind</th>
-                      <th class="text-right">Time</th>
-                      <th class="text-center">Rating</th>
+                      <th>In</th>
+                      <th>Out</th>
+                      <th>Ratio</th>
+                      <th>Grind</th>
+                      <th>Time</th>
+                      <th>Rating</th>
                       <th>Notes</th>
-                      <th class="text-center">Actions</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -857,12 +857,12 @@
                       <tr>
                         <td>${shot.date}</td>
                         <td>${shot.beanName || "—"}</td>
-                        <td class="text-right">${shot.coffeeIn}g</td>
-                        <td class="text-right">${shot.espressoOut}g</td>
-                        <td class="text-right">${getRatioForShot(shot)}</td>
-                        <td class="text-center">${shot.grindSize}</td>
-                        <td class="text-right">${shot.extractionTime}s</td>
-                        <td class="text-center" style="letter-spacing: 0.2em;">${getRatingDisplay(shot.rating)}</td>
+                        <td>${shot.coffeeIn}g</td>
+                        <td>${shot.espressoOut}g</td>
+                        <td>${getRatioForShot(shot)}</td>
+                        <td>${shot.grindSize}</td>
+                        <td>${shot.extractionTime}s</td>
+                        <td style="letter-spacing: 0.2em;">${getRatingDisplay(shot.rating)}</td>
                         <td>
                           ${shot.notes ? 
                             `<button class="notes-btn" data-notes="${shot.notes.replace(/"/g, '&quot;')}">View</button>` : 
@@ -903,7 +903,7 @@
             ` : ''}
             
             <footer>
-              <p class="footer-text">% Espresso Logger</p>
+              <p class="footer-text">© ${getCurrentYear()} dialyourespresso.com</p>
             </footer>
           `;
           
