@@ -1,313 +1,63 @@
-/* Reset and base styles */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+/* Notes modal styles */
+.notes-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
-body {
-  background-color: #ffffff;
-  color: #000000;
-  line-height: 1.6;
+.notes-modal-content {
+  background-color: white;
+  width: 80%;
+  max-width: 600px;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
-/* Force consistent fonts on ALL elements */
-body,
-button,
-input,
-optgroup,
-select,
-textarea {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
-  font-size: 16px;
-}
-
-/* Layout */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-header {
-  margin-bottom: 3rem;
-  padding-top: 1rem;
-  text-align: center;
-}
-
-.app-title {
-  font-size: 2rem;
-  font-weight: 300;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.app-title span {
-  letter-spacing: 0.2em;
-}
-
-.app-subtitle {
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: #666666;
-  margin-top: 0.25rem;
-}
-
-/* Controls */
-.controls {
+.notes-modal-header {
+  padding: 1rem;
+  border-bottom: 1px solid #E0E0E0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
 }
 
-.btn {
-  padding: 0.5rem 1rem;
-  font-size: 0.75rem !important;
+.notes-modal-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 300;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-weight: 300;
-  border: none;
+}
+
+.close-modal {
+  font-size: 1.5rem;
   cursor: pointer;
-  background-color: #000000;
-  color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
-}
-
-.btn-secondary {
-  background-color: #E0E0E0;
-  color: #000000;
-}
-
-.shot-counter {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
   color: #666666;
 }
 
-/* Form */
-.form {
-  background-color: #F5F5F5;
-  margin-bottom: 3rem;
-  padding: 1.5rem;
-}
-
-.form-title {
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 1.5rem;
-  font-weight: 300;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #666666;
-}
-
-.form-control {
-  width: 100%;
-  padding: 0.5rem;
-  font-size: 0.875rem !important;
-  border: 1px solid #E0E0E0;
-  background-color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
-}
-
-.form-control[disabled] {
-  background-color: #E0E0E0;
-  color: #666666;
-  border: none;
-}
-
-/* Dot-based rating system */
-.rating-dots {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 8px;
-}
-
-.rating-dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: #E0E0E0;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.rating-dot.active {
-  background-color: #000000;
-}
-
-.rating-dot:hover {
-  opacity: 0.8;
-}
-
-/* Table */
-.table-container {
-  border: 1px solid #E0E0E0;
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th {
-  background-color: #000000;
-  color: #ffffff;
-  padding: 0.75rem 1rem;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 300;
-  text-align: left;
-}
-
-td {
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
-  border-top: 1px solid #E0E0E0;
-}
-
-tr:nth-child(even) {
-  background-color: #F5F5F5;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-/* Empty state */
-.empty-state {
-  border: 1px solid #E0E0E0;
-  background-color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 0;
-}
-
-.empty-title {
-  color: #666666;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.5rem;
-}
-
-.empty-subtitle {
-  color: #E0E0E0;
-  font-size: 0.75rem;
-}
-
-/* Footer */
-footer {
-  margin-top: 3rem;
-  text-align: center;
-}
-
-.footer-text {
-  color: #666666;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-/* Loading */
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 2rem 0;
-}
-
-.spinner {
-  border: 2px solid #E0E0E0;
-  border-top: 2px solid #000000;
-  border-radius: 50%;
-  width: 1.5rem;
-  height: 1.5rem;
-  animation: spin 1s linear infinite;
-  margin-right: 0.5rem;
-}
-
-.loading-text {
-  font-size: 0.875rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #666666;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Error message */
-.error-message {
-  background-color: #F5F5F5;
-  border: 1px solid #E0E0E0;
+.notes-modal-body {
   padding: 1rem;
-  margin-bottom: 1.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.notes-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  text-decoration: underline;
+  padding: 0;
   font-size: 0.875rem;
 }
 
-/* Target date inputs specifically */
-input[type="date"] {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
-  font-size: 0.875rem !important;
-  -webkit-appearance: textfield !important;
-  appearance: textfield !important;
-}
-
-/* Target textarea specifically */
-textarea {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
-  font-size: 0.875rem !important;
-  resize: vertical;
-}
-
-/* Override browser-specific styling for date inputs */
-::-webkit-datetime-edit,
-::-webkit-datetime-edit-fields-wrapper,
-::-webkit-datetime-edit-text,
-::-webkit-datetime-edit-month-field,
-::-webkit-datetime-edit-day-field,
-::-webkit-datetime-edit-year-field,
-::-webkit-inner-spin-button,
-::-webkit-calendar-picker-indicator {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
+.notes-btn:hover {
+  opacity: 0.7;
 }
