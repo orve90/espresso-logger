@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} - {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  <style>
+    /* Basic styling that matches your app */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      text-align: center;
+      margin: 40px 0 20px;
+    }
+    
+    .site-title {
+      font-size: 36px;
+      font-weight: 300;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0;
+    }
+    
+    .site-navigation {
+      display: flex;
+      justify-content: center;
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+    
+    .site-navigation li {
+      margin: 0 15px;
+    }
+    
+    .site-navigation a {
+      color: #000;
+      text-decoration: none;
+      text-transform: uppercase;
+      font-size: 14px;
+      letter-spacing: 0.1em;
+    }
+    
+    .site-navigation a:hover {
+      text-decoration: underline;
+    }
+    
+    .content {
+      min-height: 500px;
+    }
+    
+    footer {
+      margin-top: 40px;
+      text-align: center;
+    }
+    
+    .footer-text {
+      color: #666;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+  </style>
+  {% if page.custom_css %}
+  <link rel="stylesheet" href="{{ page.custom_css }}">
+  {% endif %}
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 class="site-title">DIAL YOUR ESPRESSO</h1>
+      <ul class="site-navigation">
+        <li><a href="/">App</a></li>
+        <li><a href="/blog/">Blog</a></li>
+      </ul>
+    </header>
+    
+    <div class="content">
+      {{ content }}
+    </div>
+    
+    <footer>
+      <p class="footer-text">© {{ site.time | date: '%Y' }} dialyourespresso.com</p>
+    </footer>
+  </div>
+</body>
+</html>
