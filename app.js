@@ -231,6 +231,12 @@ function cancelEdit() {
   render();
 }
 
+// Truncate text if it's too long
+function truncateText(text, maxLength = 30) {
+  if (!text) return "—";
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
 // Render function
 function render() {
   app.innerHTML = `
@@ -416,6 +422,7 @@ function render() {
                 <th class="text-center">Grind</th>
                 <th class="text-right">Time</th>
                 <th class="text-center">Rating</th>
+                <th>Notes</th>
                 <th class="text-center">Actions</th>
               </tr>
             </thead>
@@ -430,6 +437,7 @@ function render() {
                   <td class="text-center">${shot.grindSize}</td>
                   <td class="text-right">${shot.extractionTime}s</td>
                   <td class="text-center" style="letter-spacing: 0.2em;">${getRatingDisplay(shot.rating)}</td>
+                  <td title="${shot.notes || ''}">${truncateText(shot.notes)}</td>
                   <td>
                     <div class="action-buttons">
                       <button
