@@ -1,0 +1,10 @@
+title: Dial Your Espresso
+description: Track and perfect your espresso shots
+url: https://orve90.github.io
+baseurl: ""
+
+markdown: kramdown
+permalink: /blog/:year/:month/:day/:title/
+
+exclude:
+  - README.md
