@@ -15,6 +15,7 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
         }
         
         body {
@@ -68,6 +69,16 @@
             cursor: pointer;
             background-color: #000;
             color: #fff;
+            transition: all 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
         }
         
         .btn-secondary {
@@ -86,6 +97,16 @@
             background-color: #f5f5f5;
             padding: 24px;
             margin-bottom: 40px;
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: fadeIn 0.4s forwards;
+        }
+        
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .form-title {
@@ -141,7 +162,11 @@
             border-radius: 50%;
             background-color: #e0e0e0;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        
+        .rating-dot:hover {
+            transform: scale(1.2);
         }
         
         .rating-dot.active {
@@ -180,6 +205,14 @@
             text-align: left;
         }
         
+        tr {
+            transition: background-color 0.2s ease;
+        }
+        
+        tr:hover {
+            background-color: #f9f9f9 !important;
+        }
+        
         tr:nth-child(even) {
             background-color: #f5f5f5;
         }
@@ -204,6 +237,11 @@
             font-size: 14px;
             font-family: inherit;
             text-align: left;
+            transition: opacity 0.2s ease;
+        }
+        
+        .notes-btn:hover {
+            opacity: 0.7;
         }
         
         .empty-state {
@@ -214,6 +252,7 @@
             align-items: center;
             justify-content: center;
             padding: 64px 0;
+            animation: fadeIn 0.5s ease-in-out;
         }
         
         .empty-title {
@@ -246,16 +285,26 @@
             justify-content: center;
             align-items: center;
             margin: 20px 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 999;
+            backdrop-filter: blur(2px);
+            transition: opacity 0.3s ease;
         }
         
         .spinner {
-            border: 2px solid #e0e0e0;
-            border-top: 2px solid #000;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-top: 3px solid #000;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 30px;
+            height: 30px;
             animation: spin 1s linear infinite;
-            margin-right: 10px;
+            margin-right: 15px;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
         
         @keyframes spin {
@@ -276,6 +325,7 @@
             padding: 15px;
             margin-bottom: 20px;
             font-size: 14px;
+            animation: fadeIn 0.3s ease-in-out;
         }
         
         /* Notes modal styles */
@@ -290,6 +340,8 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            opacity: 0;
+            animation: modalFadeIn 0.3s forwards;
         }
         
         .notes-modal-content {
@@ -298,6 +350,20 @@
             max-width: 600px;
             border-radius: 4px;
             overflow: hidden;
+            transform: scale(0.9);
+            animation: modalScale 0.3s forwards;
+        }
+        
+        @keyframes modalFadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes modalScale {
+            to {
+                transform: scale(1);
+            }
         }
         
         .notes-modal-header {
@@ -320,6 +386,11 @@
             font-size: 24px;
             cursor: pointer;
             color: #666;
+            transition: transform 0.2s ease;
+        }
+        
+        .close-modal:hover {
+            transform: scale(1.1);
         }
         
         .notes-modal-body {
@@ -327,15 +398,42 @@
             max-height: 60vh;
             overflow-y: auto;
         }
+        
+        /* Action feedback */
+        .action-feedback {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            color: white;
+            border-radius: 4px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        /* Row animation */
+        @keyframes rowFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
     <div style="text-align: center; margin: 20px 0;">
-  <ul style="display: flex; justify-content: center; list-style: none; padding: 0; margin: 0;">
-    <li style="margin: 0 15px;"><a href="/espresso-logger/" style="color: #000; text-decoration: none; text-transform: uppercase; font-size: 14px; letter-spacing: 0.1em;">App</a></li>
-    <li style="margin: 0 15px;"><a href="/espresso-logger/blog/" style="color: #000; text-decoration: none; text-transform: uppercase; font-size: 14px; letter-spacing: 0.1em;">Blog</a></li>
-  </ul>
-</div>
+      <ul style="display: flex; justify-content: center; list-style: none; padding: 0; margin: 0;">
+        <li style="margin: 0 15px;"><a href="/espresso-logger/" style="color: #000; text-decoration: none; text-transform: uppercase; font-size: 14px; letter-spacing: 0.1em;">App</a></li>
+        <li style="margin: 0 15px;"><a href="/espresso-logger/blog/" style="color: #000; text-decoration: none; text-transform: uppercase; font-size: 14px; letter-spacing: 0.1em;">Blog</a></li>
+      </ul>
+    </div>
+    
     <div id="app" class="container"></div>
     
     <script>
@@ -463,15 +561,67 @@
           return html;
         }
 
+        // Visual feedback for actions
+        function showActionFeedback(message, isError = false) {
+          const feedback = document.createElement('div');
+          feedback.className = 'action-feedback';
+          feedback.textContent = message;
+          feedback.style.backgroundColor = isError ? '#f44336' : '#4CAF50';
+          
+          document.body.appendChild(feedback);
+          
+          // Animate in
+          setTimeout(() => {
+            feedback.style.opacity = '1';
+            feedback.style.transform = 'translateY(0)';
+          }, 10);
+          
+          // Animate out
+          setTimeout(() => {
+            feedback.style.opacity = '0';
+            feedback.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+              document.body.removeChild(feedback);
+            }, 300);
+          }, 3000);
+        }
+
         // Event Handlers
         function toggleForm() {
-          state.isFormVisible = !state.isFormVisible;
+          // If form is becoming visible, add transition effect
           if (!state.isFormVisible) {
-            state.editIndex = null;
-            resetForm();
+            state.isFormVisible = true;
+            state.error = '';
+            render();
+            
+            // Focus on the first input after a slight delay to allow animation
+            setTimeout(() => {
+              const firstInput = document.querySelector('.form-control');
+              if (firstInput) firstInput.focus();
+            }, 300);
+          } else {
+            // If hiding the form, fade it out first
+            const form = document.getElementById('shot-form');
+            if (form) {
+              form.style.opacity = '0';
+              form.style.transform = 'translateY(-10px)';
+              
+              // After animation completes, actually hide the form in state
+              setTimeout(() => {
+                state.isFormVisible = false;
+                state.editIndex = null;
+                resetForm();
+                render();
+              }, 300);
+            } else {
+              // Fallback if form element not found
+              state.isFormVisible = false;
+              state.editIndex = null;
+              resetForm();
+              render();
+            }
           }
-          state.error = '';
-          render();
         }
 
         function resetForm() {
@@ -494,11 +644,6 @@
           render();
         }
 
-        function handleRatingDotClick(rating) {
-          state.formData.rating = rating;
-          render();
-        }
-
         async function handleSubmit(event) {
           event.preventDefault();
           
@@ -514,12 +659,14 @@
                 updatedAt: new Date().toISOString()
               });
               state.editIndex = null;
+              showActionFeedback('Shot updated!');
             } else {
               // Add new shot
               await db.collection('shots').add({
                 ...state.formData,
                 createdAt: new Date().toISOString()
               });
+              showActionFeedback('Shot saved!');
             }
             
             resetForm();
@@ -527,6 +674,7 @@
           } catch (error) {
             console.error("Error submitting form:", error);
             state.error = 'An error occurred while saving to the cloud. Please try again.';
+            showActionFeedback('Error saving shot', true);
           } finally {
             state.loading = false;
             render();
@@ -555,21 +703,38 @@
               
               const shotId = state.shots[index].id;
               await db.collection('shots').doc(shotId).delete();
+              showActionFeedback('Shot deleted');
             }
           } catch (error) {
             console.error("Error deleting shot:", error);
             state.error = 'Could not delete this entry from the cloud. Please try again.';
+            showActionFeedback('Error deleting shot', true);
             state.loading = false;
             render();
           }
         }
 
         function cancelEdit() {
-          state.editIndex = null;
-          state.isFormVisible = false;
-          resetForm();
-          state.error = '';
-          render();
+          // Fade out form first
+          const form = document.getElementById('shot-form');
+          if (form) {
+            form.style.opacity = '0';
+            form.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+              state.editIndex = null;
+              state.isFormVisible = false;
+              resetForm();
+              state.error = '';
+              render();
+            }, 300);
+          } else {
+            state.editIndex = null;
+            state.isFormVisible = false;
+            resetForm();
+            state.error = '';
+            render();
+          }
         }
 
         // Excel export function
@@ -620,9 +785,11 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            
+            showActionFeedback('Data exported successfully');
           } catch (error) {
             console.error('Error exporting to Excel:', error);
-            alert('Failed to export data. Please try again.');
+            showActionFeedback('Failed to export data', true);
           }
         }
 
@@ -644,17 +811,36 @@
           
           document.body.appendChild(modal);
           
+          // Prevent body scrolling when modal is open
+          document.body.style.overflow = 'hidden';
+          
+          // Close functions with animation
+          const closeModal = () => {
+            modal.style.opacity = '0';
+            modal.querySelector('.notes-modal-content').style.transform = 'scale(0.9)';
+            
+            setTimeout(() => {
+              document.body.removeChild(modal);
+              document.body.style.overflow = '';
+            }, 300);
+          };
+          
           // Close when clicking the X
-          modal.querySelector('.close-modal').addEventListener('click', () => {
-            document.body.removeChild(modal);
-          });
+          modal.querySelector('.close-modal').addEventListener('click', closeModal);
           
           // Close when clicking outside the modal content
           modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-              document.body.removeChild(modal);
+              closeModal();
             }
           });
+          
+          // Close when pressing Escape key
+          window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.body.contains(modal)) {
+              closeModal();
+            }
+          }, { once: true });
         }
 
         // Get current year for copyright
@@ -811,6 +997,7 @@
                   <label class="form-label">Notes</label>
                   <textarea
                     name="notes"
+                    class="form-name="notes"
                     class="form-control"
                     placeholder="Tasting notes, observations, improvements..."
                     rows="3"
@@ -860,7 +1047,7 @@
                   </thead>
                   <tbody>
                     ${state.shots.map((shot, index) => `
-                      <tr>
+                      <tr style="animation: rowFadeIn 0.3s forwards; animation-delay: ${index * 0.05}s; opacity: 0;">
                         <td>${shot.date}</td>
                         <td>${shot.beanName || "—"}</td>
                         <td>${shot.coffeeIn}g</td>
